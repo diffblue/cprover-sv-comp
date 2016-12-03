@@ -4,17 +4,21 @@
 
 `make`
 
-#### Wrapper script
+#### Build wrapper script
 
-`cbmc`
+`make` tool`-wrapper`
+
+where tool is `cbmc` or `2ls`, for instance
 
 #### Benchexec tool script
 
-https://github.com/sosy-lab/benchexec/blob/master/benchexec/tools/cbmc.py
+* CBMC: https://github.com/sosy-lab/benchexec/blob/master/benchexec/tools/cbmc.py
+* 2LS: https://github.com/sosy-lab/benchexec/blob/master/benchexec/tools/two_ls.py
 
 #### Benchexec benchmark definition
 
-https://github.com/sosy-lab/sv-comp/blob/master/benchmark-defs/cbmc.xml
+* CBMC: https://github.com/sosy-lab/sv-comp/blob/master/benchmark-defs/cbmc.xml
+* 2LS: https://github.com/sosy-lab/sv-comp/blob/master/benchmark-defs/2ls.xml
 
 #### License
 
