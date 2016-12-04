@@ -119,7 +119,6 @@ if [ ! -s $LOG.ok ] ; then
   exit 1
 fi
 
-eval `tail -n 1 $LOG.ok`
 cat $LOG.ok
 case $EC in
   0) if [[ "$WITNESS_FILE" != "" ]]; then process_graphml $EC > $WITNESS_FILE; \
