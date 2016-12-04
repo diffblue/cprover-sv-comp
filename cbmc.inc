@@ -31,4 +31,5 @@ esac ; \
 \
 done \
 '
+  eval `tail -n 1 $LOG.ok`
 }
