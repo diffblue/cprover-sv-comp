@@ -28,18 +28,20 @@ if(/^CHECK\(init\((\S+)\(\)\),LTL\((\S+)\)\)$/) {
 
 parse_result()
 {
-  if tail -n 50 $LOG.ok | grep -q "^[[:space:]]*__CPROVER_memory_leak == NULL$"\
- ; then
+  if tail -n 50 $LOG.ok | \
+      grep -Eq "^(\[.*\] |[[:space:]]*)__CPROVER_memory_leak == NULL$" ; then
     echo 'FALSE(valid-memtrack)'
-  elif tail -n 50 $LOG.ok | grep -q "^[[:space:]]*dereference failure:" ; then
+  elif tail -n 50 $LOG.ok | \
+      grep -Eq "^(\[.*\] |[[:space:]]*)dereference failure:" ; then
     echo 'FALSE(valid-deref)'
-  elif tail -n 50 $LOG.ok | grep -q "^[[:space:]]*double free$" ; then
+  elif tail -n 50 $LOG.ok | \
+      grep -Eq "^(\[.*\] |[[:space:]]*)double free$" ; then
     echo 'FALSE(valid-free)'
-  elif tail -n 50 $LOG.ok | grep -q "^[[:space:]]*free argument has offset zero\
-$" ; then
+  elif tail -n 50 $LOG.ok | \
+      grep -Eq "^(\[.*\] |[[:space:]]*)free argument has offset zero$" ; then
     echo 'FALSE(valid-free)'
-  elif tail -n 50 $LOG.ok | grep -q "^[[:space:]]*arithmetic overflow on signed\
-" ; then
+  elif tail -n 50 $LOG.ok | \
+      grep -Eq "^(\[.*\] |[[:space:]]*)arithmetic overflow on signed" ; then
     echo 'FALSE(no-overflow)'
   elif [[ "$PROP" == "termination" ]]; then
     echo 'FALSE(termination)'
