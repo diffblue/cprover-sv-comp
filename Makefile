@@ -21,7 +21,7 @@ CBMC-sv-comp-$(YEAR).tar.gz: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/s
 	mv cbmc-wrapper tmp/cbmc
 	cp $(CBMC)/LICENSE tmp/
 	cp $(CBMC)/src/cbmc/cbmc tmp/cbmc-binary
-	cd tmp && tar cfz ../$@ * && rm cbmc cbmc-binary LICENSE
+	cd tmp && chmod a+rX * && tar cfz ../$@ * && rm cbmc cbmc-binary LICENSE
 	rmdir tmp
 
 2ls-sv-comp-$(YEAR).tar.gz: 2ls.inc tool-wrapper.inc $(2LS)/LICENSE $(2LS)/src/summarizer/2ls
@@ -30,5 +30,5 @@ CBMC-sv-comp-$(YEAR).tar.gz: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/s
 	mv 2ls-wrapper tmp/2ls
 	cp $(2LS)/LICENSE tmp/
 	cp $(2LS)/src/summarizer/2ls tmp/2ls-binary
-	cd tmp && tar cfz ../$@ * && rm 2ls 2ls-binary LICENSE
+	cd tmp && chmod a+rX * && tar cfz ../$@ * && rm 2ls 2ls-binary LICENSE
 	rmdir tmp
