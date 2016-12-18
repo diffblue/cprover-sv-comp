@@ -8,8 +8,8 @@ declare -A OPTIONS
 OPTIONS["label"]="--error-label"
 OPTIONS["unreach_call"]=""
 OPTIONS["termination"]=""
-OPTIONS["overflow"]="--signed-overflow-check"
-OPTIONS["memsafety"]="--pointer-check --memory-leak-check --bounds-check"
+OPTIONS["overflow"]="--signed-overflow-check --no-assertions"
+OPTIONS["memsafety"]="--pointer-check --memory-leak-check --bounds-check --no-assertions"
 
 parse_property_file()
 {
@@ -33,6 +33,9 @@ parse_result()
     echo 'FALSE(valid-memtrack)'
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] |[[:space:]]*)dereference failure:" ; then
+    echo 'FALSE(valid-deref)'
+  elif tail -n 50 $LOG.ok | \
+      grep -Eq "^(\[.*\] |[[:space:]]*)array.* upper bound in " ; then
     echo 'FALSE(valid-deref)'
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] |[[:space:]]*)double free$" ; then
