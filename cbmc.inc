@@ -7,6 +7,11 @@ TOOL_NAME=CBMC
 
 run() 
 {
+  if [ "$PROP" = "termination" ] ; then
+    EC=42
+    return
+  fi
+
 timeout 850 bash -c ' \
 \
 ulimit -v 15000000 ; \
