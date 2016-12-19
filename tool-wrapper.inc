@@ -8,21 +8,21 @@ declare -A OPTIONS
 OPTIONS["label"]="--error-label"
 OPTIONS["unreach_call"]=""
 OPTIONS["termination"]=""
-OPTIONS["overflow"]="--signed-overflow-check"
-OPTIONS["memsafety"]="--pointer-check --memory-leak-check --bounds-check"
+OPTIONS["overflow"]="--signed-overflow-check --no-assertions"
+OPTIONS["memsafety"]="--pointer-check --memory-leak-check --bounds-check --no-assertions"
 
 parse_property_file()
 {
   local fn=$1
 
-  cat $fn | sed 's/[[:space:]]//g' | perl -n -e '                               
-if(/^CHECK\(init\((\S+)\(\)\),LTL\((\S+)\)\)$/) {                               
-  print "ENTRY=$1\n";                                                           
-  print "PROP=\"label\"\nLABEL=\"$1\"\n" if($2 =~ /^G!label\((\S+)\)$/);        
+  cat $fn | sed 's/[[:space:]]//g' | perl -n -e '
+if(/^CHECK\(init\((\S+)\(\)\),LTL\((\S+)\)\)$/) {
+  print "ENTRY=$1\n";
+  print "PROP=\"label\"\nLABEL=\"$1\"\n" if($2 =~ /^G!label\((\S+)\)$/);
   print "PROP=\"unreach_call\"\n" if($2 =~ /^G!call\(__VERIFIER_error\(\)\)$/);
-  print "PROP=\"memsafety\"\n" if($2 =~ /^Gvalid-(free|deref|memtrack)$/);      
-  print "PROP=\"overflow\"\n" if($2 =~ /^G!overflow$/);                         
-  print "PROP=\"termination\"\n" if($2 =~ /^Fend$/);                            
+  print "PROP=\"memsafety\"\n" if($2 =~ /^Gvalid-(free|deref|memtrack)$/);
+  print "PROP=\"overflow\"\n" if($2 =~ /^G!overflow$/);
+  print "PROP=\"termination\"\n" if($2 =~ /^Fend$/);
 }'
 }
 
@@ -33,6 +33,9 @@ parse_result()
     echo 'FALSE(valid-memtrack)'
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] |[[:space:]]*)dereference failure:" ; then
+    echo 'FALSE(valid-deref)'
+  elif tail -n 50 $LOG.ok | \
+      grep -Eq "^(\[.*\] |[[:space:]]*)array.* upper bound in " ; then
     echo 'FALSE(valid-deref)'
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] |[[:space:]]*)double free$" ; then
@@ -58,12 +61,12 @@ process_graphml()
     else
       TYPE="violation_witness"
     fi
-    cat $LOG.witness | perl -p -e "s/(<graph edgedefault=\"directed\">)/\$1\\E  
-      <data key=\"witness-type\">$(echo $TYPE)<\/data>                          
-      <data key=\"producer\">$(echo $TOOL_NAME)<\/data>                         
-      <data key=\"specification\">$(<$PROP_FILE)<\/data>                        
-      <data key=\"programfile\">$(echo $BM | sed 's8/8\\/8g')<\/data>           
-      <data key=\"programhash\">$(sha1sum $BM | awk '{print $1}')<\/data>       
+    cat $LOG.witness | perl -p -e "s/(<graph edgedefault=\"directed\">)/\$1\\E
+      <data key=\"witness-type\">$(echo $TYPE)<\/data>
+      <data key=\"producer\">$(echo $TOOL_NAME)<\/data>
+      <data key=\"specification\">$(<$PROP_FILE)<\/data>
+      <data key=\"programfile\">$(echo $BM | sed 's8/8\\/8g')<\/data>
+      <data key=\"programhash\">$(sha1sum $BM | awk '{print $1}')<\/data>
       <data key=\"architecture\">${BIT_WIDTH##--}bit<\/data>\\Q/"
   fi
 }
