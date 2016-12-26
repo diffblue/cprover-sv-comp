@@ -29,7 +29,7 @@ if(/^CHECK\(init\((\S+)\(\)\),LTL\((\S+)\)\)$/) {
 parse_result()
 {
   if tail -n 50 $LOG.ok | \
-      grep -Eq "^(\[.*\] |[[:space:]]*)__CPROVER_memory_leak == NULL$" ; then
+      grep -Eq "^(\[.*\] .*__CPROVER_memory_leak == NULL|[[:space:]]*__CPROVER_memory_leak == NULL$)" ; then
     echo 'FALSE(valid-memtrack)'
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] |[[:space:]]*)dereference failure:" ; then
@@ -38,10 +38,10 @@ parse_result()
       grep -Eq "^(\[.*\] |[[:space:]]*)array.* upper bound in " ; then
     echo 'FALSE(valid-deref)'
   elif tail -n 50 $LOG.ok | \
-      grep -Eq "^(\[.*\] |[[:space:]]*)double free$" ; then
+      grep -Eq "^(\[.*\] double free|[[:space:]]*double free$)" ; then
     echo 'FALSE(valid-free)'
   elif tail -n 50 $LOG.ok | \
-      grep -Eq "^(\[.*\] |[[:space:]]*)free argument has offset zero$" ; then
+      grep -Eq "^(\[.*\] free argument has offset zero|[[:space:]]* free argument has offset zero$)" ; then
     echo 'FALSE(valid-free)'
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] |[[:space:]]*)arithmetic overflow on signed" ; then
