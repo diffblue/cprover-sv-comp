@@ -113,6 +113,8 @@ export BIT_WIDTH
 export BM
 export PROP
 
+export GMON_OUT_PREFIX=`basename $BM`.gmon.out
+
 export LOG=`mktemp -t ${TOOL_NAME}-log.XXXXXX`
 trap "rm -f $LOG $LOG.latest $LOG.ok $LOG.witness" EXIT
 

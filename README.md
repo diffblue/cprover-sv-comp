@@ -52,3 +52,10 @@ bin/table-generator results/*xml.bz2
 
 Replace 2ls by cbmc to use the above with CBMC.
 
+#### Collecting profiling data
+```
+bin/benchexec cbmc.xml --tasks <those categories that you want to run> -T 120s
+gprof --sum ./cbmc-binary *.gmon.out.*
+gprof ./cbmc-profiling gmon.sum > sum.profile
+rm gmon.out *.gmon.out.*
+```
