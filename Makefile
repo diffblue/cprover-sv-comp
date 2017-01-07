@@ -24,11 +24,11 @@ CBMC-sv-comp-$(YEAR).tar.gz: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/s
 	cd tmp && chmod a+rX * && tar cfz ../$@ * && rm cbmc cbmc-binary LICENSE
 	rmdir tmp
 
-2ls-sv-comp-$(YEAR).tar.gz: 2ls.inc tool-wrapper.inc $(2LS)/LICENSE $(2LS)/src/summarizer/2ls
+2ls-sv-comp-$(YEAR).tar.gz: 2ls.inc tool-wrapper.inc $(2LS)/LICENSE $(2LS)/src/2ls/2ls
 	mkdir -p tmp
 	$(MAKE) 2ls-wrapper
 	mv 2ls-wrapper tmp/2ls
 	cp $(2LS)/LICENSE tmp/
-	cp $(2LS)/src/summarizer/2ls tmp/2ls-binary
+	cp $(2LS)/src/2ls/2ls tmp/2ls-binary
 	cd tmp && chmod a+rX * && tar cfz ../$@ * && rm 2ls 2ls-binary LICENSE
 	rmdir tmp
