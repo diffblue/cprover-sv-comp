@@ -42,8 +42,13 @@ if [ -z "$PROP_FILE" ] || [ ! -s "$PROP_FILE" ] ; then
   exit 1
 fi
 
-if [ -z "$WITNESS_FILE" ] || [ ! -s "$WITNESS_FILE" ] ; then
-  echo "Missing or empty witness file $WITNESS_FILE"
+if [ -z "$WITNESS_FILE" ] ; then
+  echo "Missing witness file"
+  exit 1
+fi
+
+if [ ! -s "$WITNESS_FILE" ] ; then
+  echo "INVALID WITNESS FILE: witness file $WITNESS_FILE is empty"
   exit 1
 fi
 

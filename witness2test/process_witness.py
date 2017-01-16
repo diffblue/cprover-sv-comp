@@ -6,6 +6,7 @@ from pycparser import c_ast, c_generator, c_parser, parse_file
 import argparse
 import hashlib
 import re
+import sys
 #import xml.etree.CElementTree as ElementTree
 import xml.etree.ElementTree as ElementTree
 
@@ -14,6 +15,11 @@ def validateConfig(graph, ns, witness, benchmark, bitwidth):
   for k in graph.findall('./graphml:data', ns):
     key = k.get('key')
     config[key] = k.text
+
+  for k in ['witness-type', 'sourcecodelang', 'architecture', 'programhash']:
+    if config.get(k) is None:
+      print('INVALID WITNESS FILE: mandatory field {} missing'.format(k))
+      sys.exit(1)
 
   if config['witness-type'] != 'violation_witness':
     raise ValueError('No support for ' + config['witness-type'])
@@ -27,7 +33,8 @@ def validateConfig(graph, ns, witness, benchmark, bitwidth):
   with open(benchmark, 'rb') as b:
     sha1hash = hashlib.sha1(b.read()).hexdigest()
     if config['programhash'] != sha1hash:
-      raise ValueError('SHA1 mismatch')
+      print('INVALID WITNESS FILE: SHA1 mismatch')
+      sys.exit(1)
 
   spec = re.sub(r'\s+', '', config['specification'])
   return re.sub(r'CHECK\(init\((\S+)\(\)\),LTL\((\S+)\)\)', '\g<1>', spec)
@@ -74,7 +81,9 @@ def checkTrace(trace, entryNode, violationNode):
   n = entryNode
   while trace[n].get('target') is not None:
     n = trace[n]['target']
-  assert n == violationNode
+  if n != violationNode:
+    print("INVALID WITNESS FILE: trace does not end in violation node")
+    sys.exit(1)
 
 
 def buildTrace(graph, ns, trace):
@@ -90,8 +99,12 @@ def buildTrace(graph, ns, trace):
       elif d.get('key') == 'violation' and d.text == 'true':
         assert violationNode is None
         violationNode = i
-  assert entryNode is not None
-  assert violationNode is not None
+  if entryNode is None:
+    print("INVALID WITNESS FILE: no entry node")
+    sys.exit(1)
+  if violationNode is None:
+    print("INVALID WITNESS FILE: no violation node")
+    sys.exit(1)
 
   for e in graph.findall('./graphml:edge', ns):
     s = e.get('source')
@@ -111,11 +124,17 @@ def buildTrace(graph, ns, trace):
 
 
 def processWitness(witness, benchmark, bitwidth):
-  root = ElementTree.parse(witness).getroot()
+  try:
+    root = ElementTree.parse(witness).getroot()
+  except:
+    print("INVALID WITNESS FILE: failed to parse XML")
+    sys.exit(1)
   # print(ElementTree.tostring(root))
   ns = {'graphml': 'http://graphml.graphdrawing.org/xmlns'}
   graph = root.find('./graphml:graph', ns)
-  assert graph is not None
+  if graph is None:
+    print("INVALID WITNESS FILE: failed to parse XML - no graph node")
+    sys.exit(1)
 
   entryFun = validateConfig(graph, ns, witness, benchmark, bitwidth)
 
