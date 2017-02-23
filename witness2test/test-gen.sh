@@ -70,13 +70,13 @@ DATA=`mktemp -d -t witness.XXXXXX`
 trap "rm -rf $DATA" EXIT
 # echo $DATA
 
-cp $WITNESS_FILE $BM $DATA
-WITNESS_FILE=`basename $WITNESS_FILE`
-BM=`basename $BM`
+cp "$WITNESS_FILE" "$BM" $DATA
+WITNESS_FILE=`basename "$WITNESS_FILE"`
+BM=`basename "$BM"`
 cd $DATA
 PYTHONPATH=$SCRIPTDIR/pycparser-master \
   python $SCRIPTDIR/process_witness.py \
-  $BIT_WIDTH -w $WITNESS_FILE -b $BM > data
+  $BIT_WIDTH -w "$WITNESS_FILE" -b "$BM" > data
 $SCRIPTDIR/TestEnvGenerator.pl < data
 ec=0
 make -f tester.mk CC="gcc $BIT_WIDTH" > log 2>&1 || ec=$?
