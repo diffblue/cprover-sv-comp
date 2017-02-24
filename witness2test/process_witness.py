@@ -91,6 +91,7 @@ def checkTrace(trace, entryNode, violationNode):
 def buildTrace(graph, ns, trace):
   entryNode = None
   violationNode = None
+  sinks = {}
   for n in graph.findall('./graphml:node', ns):
     i = n.get('id')
     trace[i] = {}
@@ -101,6 +102,8 @@ def buildTrace(graph, ns, trace):
       elif d.get('key') == 'violation' and d.text == 'true':
         assert violationNode is None
         violationNode = i
+      elif d.get('key') == 'sink' and d.text == 'true':
+        sinks[i] = True
   if entryNode is None:
     print("INVALID WITNESS FILE: no entry node")
     sys.exit(1)
@@ -112,6 +115,8 @@ def buildTrace(graph, ns, trace):
     s = e.get('source')
     t = e.get('target')
     if s == violationNode:
+      continue
+    elif sinks.get(t) is not None:
       continue
     # only linear traces supported
     assert trace[s].get('target') is None
