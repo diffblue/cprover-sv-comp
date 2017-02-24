@@ -157,6 +157,8 @@ def processWitness(witness, benchmark, bitwidth):
       subprocess.check_call(['gcc', '-E', benchmarkFile, '-o', fp.name])
       benchmarkFile = fp.name
     with open(benchmarkFile, 'r') as b:
+      needStructBody = False
+      skipAsm = False
       for line in b:
         line = re.sub(r'__attribute__\s*\(\(\s*[a-z_, ]+\s*\)\)\s*', '', line)
         line = re.sub(r'__attribute__\s*\(\(\s*[a-z_, ]+\s*\(\s*[a-zA-Z0-9_, ]+\s*\)\s*\)\)\s*', '', line)
@@ -164,8 +166,22 @@ def processWitness(witness, benchmark, bitwidth):
         line = re.sub(r'__restrict', 'restrict', line)
         line = re.sub(r'__inline', 'inline', line)
         line = re.sub(r'__const', 'const', line)
-        # a cruel hack for some C-standards violating code in LDV benchmarks
-        line = re.sub(r'^struct mod_arch_specific {$', 'struct mod_arch_specific { int __dummy;', line)
+        # a hack for some C-standards violating code in LDV benchmarks
+        if needStructBody and re.match(r'^\s*}\s*;\s*$', line):
+          line = 'int __dummy; ' + line
+          needStructBody = False
+        elif needStructBody:
+          needStructBody = re.match(r'^\s*$', line) is not None
+        elif re.match(r'^\s*struct\s+[a-zA-Z0-9_]+\s*{\s*$', line):
+          needStructBody = True
+        # remove inline asm
+        if re.match(r'^\s*__asm__\s+volatile\s*\([^;]*$', line):
+          skipAsm = True
+        elif skipAsm and re.search(r'\)\s*;\s*$', line):
+          line = '\n'
+          skipAsm = False
+        if skipAsm:
+          line = '\n'
         benchmarkString += line
   parser = c_parser.CParser()
   ast = parser.parse(benchmarkString, filename=benchmark)
