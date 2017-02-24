@@ -53,14 +53,17 @@ def setupTypes(ast, entryFunc, inputs, nondets, entry):
         nondets[fun.name] = info
     elif isinstance(fun, c_ast.FuncDef):
       inputs[fun.decl.name] = {}
-      for d in fun.body.block_items:
-        if isinstance(d, c_ast.Decl):
-          info = {}
-          typestr = c_generator.CGenerator().visit(d.type)
-          info['type'] = typedefs.get(typestr, typestr)
-          info['line'] = d.coord.line
-          if d.init is None:
-            inputs[fun.decl.name][d.name] = info
+      if fun.body.block_items:
+        for d in fun.body.block_items:
+          if isinstance(d, c_ast.Decl):
+            info = {}
+            typestr = c_generator.CGenerator().visit(d.type)
+            while typedefs.get(typestr):
+              typestr = typedefs.get(typestr)
+            info['type'] = typestr
+            info['line'] = d.coord.line
+            if d.init is None:
+              inputs[fun.decl.name][d.name] = info
       if fun.decl.name == entryFunc:
         entry['type'] = c_generator.CGenerator().visit(fun.decl.type)
         entry['line'] = fun.coord.line
