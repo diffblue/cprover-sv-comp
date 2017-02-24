@@ -45,11 +45,11 @@ def validateConfig(graph, ns, witness, benchmark, bitwidth):
 def setupTypes(ast, entryFunc, inputs, nondets, entry):
   for fun in ast.ext:
     if isinstance(fun, c_ast.Decl) and isinstance(fun.type, c_ast.FuncDecl):
-      if fun.type.type.declname.startswith('__VERIFIER_nondet_'):
+      if fun.name.startswith('__VERIFIER_nondet_'):
         info = {}
         info['type'] = c_generator.CGenerator().visit(fun.type)
         info['line'] = fun.coord.line
-        nondets[fun.type.type.declname] = info
+        nondets[fun.name] = info
     elif isinstance(fun, c_ast.FuncDef):
       inputs[fun.decl.name] = {}
       for d in fun.body.block_items:
