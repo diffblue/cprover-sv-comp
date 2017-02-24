@@ -43,6 +43,7 @@ def validateConfig(graph, ns, witness, benchmark, bitwidth):
 
 
 def setupTypes(ast, entryFunc, inputs, nondets, entry):
+  typedefs = {}
   for fun in ast.ext:
     if isinstance(fun, c_ast.Decl) and isinstance(fun.type, c_ast.FuncDecl):
       if fun.name.startswith('__VERIFIER_nondet_'):
@@ -55,13 +56,16 @@ def setupTypes(ast, entryFunc, inputs, nondets, entry):
       for d in fun.body.block_items:
         if isinstance(d, c_ast.Decl):
           info = {}
-          info['type'] = c_generator.CGenerator().visit(d.type)
+          typestr = c_generator.CGenerator().visit(d.type)
+          info['type'] = typedefs.get(typestr, typestr)
           info['line'] = d.coord.line
           if d.init is None:
             inputs[fun.decl.name][d.name] = info
       if fun.decl.name == entryFunc:
         entry['type'] = c_generator.CGenerator().visit(fun.decl.type)
         entry['line'] = fun.coord.line
+    elif isinstance(fun, c_ast.Typedef):
+      typedefs[fun.name] = c_generator.CGenerator().visit(fun.type.type)
 
 
 def setupWatch(ast, watch):
