@@ -194,7 +194,9 @@ def processWitness(witness, benchmark, bitwidth):
         elif skipAsm and re.search(r'\)\s*;\s*$', line):
           line = '\n'
           skipAsm = False
-        if skipAsm:
+          line = '\n'
+        if (skipAsm or
+            re.match(r'^\s*__asm__\s+volatile\s*\([^;]*\)\s*;\s*$', line)):
           line = '\n'
         benchmarkString += line
   parser = c_parser.CParser()
