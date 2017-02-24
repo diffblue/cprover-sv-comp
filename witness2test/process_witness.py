@@ -154,12 +154,9 @@ def processWitness(witness, benchmark, bitwidth):
   entryFun = validateConfig(graph, ns, witness, benchmark, bitwidth)
 
   benchmarkString = ''
-  benchmarkFile = benchmark
   with tempfile.NamedTemporaryFile() as fp:
-    if benchmark.endswith('c'):
-      subprocess.check_call(['gcc', '-E', benchmarkFile, '-o', fp.name])
-      benchmarkFile = fp.name
-    with open(benchmarkFile, 'r') as b:
+    subprocess.check_call(['gcc', '-x', 'c', '-E', benchmark, '-o', fp.name])
+    with open(fp.name, 'r') as b:
       needStructBody = False
       skipAsm = False
       inAttribute = False
