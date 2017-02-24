@@ -224,14 +224,13 @@ def processWitness(witness, benchmark, bitwidth):
       if isinstance(a_ast, c_ast.Assignment):
         f = trace[n].get('assumption.scope')
         v = c_generator.CGenerator().visit(a_ast.rvalue)
-        a_ast.show(showcoord=True)
-        if (f is not None and
-            isinstance(a_ast.lvalue, c_ast.ID) and
-            inputs[f].get(a_ast.lvalue.name) is not None):
-          values.append([f, a_ast.lvalue.name, v])
-        elif watch.get(int(trace[n]['startline'])) is not None:
+        if watch.get(int(trace[n]['startline'])) is not None:
           w = watch[int(trace[n]['startline'])]
           values.append([w, v])
+        elif (f is not None and
+              isinstance(a_ast.lvalue, c_ast.ID) and
+              inputs[f].get(a_ast.lvalue.name) is not None):
+          values.append([f, a_ast.lvalue.name, v])
         # else:
         #   print(trace[n]['startline'])
         #   a_ast.show()
