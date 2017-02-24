@@ -159,6 +159,7 @@ def processWitness(witness, benchmark, bitwidth):
         line = re.sub(r'__extension__', '', line)
         line = re.sub(r'__restrict', 'restrict', line)
         line = re.sub(r'__inline', 'inline', line)
+        line = re.sub(r'__const', 'const', line)
         benchmarkString += line
   parser = c_parser.CParser()
   ast = parser.parse(benchmarkString, filename=benchmark)
