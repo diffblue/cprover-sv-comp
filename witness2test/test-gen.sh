@@ -94,7 +94,7 @@ if [ "$PROP" = "unreach_call" ] ; then
     else
       echo "UNKNOWN"
     fi
-    exit 1
+    exit $ec
   fi
   echo "$BM: OK"
   echo "FALSE"
