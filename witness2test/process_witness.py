@@ -176,8 +176,10 @@ def processWitness(witness, benchmark, bitwidth):
         # rewrite some GCC extensions
         line = re.sub(r'__extension__', '', line)
         line = re.sub(r'__restrict', 'restrict', line)
+        line = re.sub(r'__inline__', 'inline', line)
         line = re.sub(r'__inline', 'inline', line)
         line = re.sub(r'__const', 'const', line)
+        line = re.sub(r'__signed__', 'signed', line)
         # a hack for some C-standards violating code in LDV benchmarks
         if needStructBody and re.match(r'^\s*}\s*;\s*$', line):
           line = 'int __dummy; ' + line
