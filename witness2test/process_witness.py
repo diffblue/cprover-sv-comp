@@ -70,7 +70,8 @@ def setupWatch(ast, watch):
       self.watch = watch
 
     def visit_FuncCall(self, node):
-      if node.name.name.startswith('__VERIFIER_nondet_'):
+      if (isinstance(node.name, c_ast.ID) and
+          node.name.name.startswith('__VERIFIER_nondet_')):
         l = node.name.coord.line
         assert self.watch.get(l) is None
         self.watch[l] = node.name.name
