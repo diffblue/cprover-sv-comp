@@ -47,6 +47,11 @@ if [ -z "$WITNESS_FILE" ] ; then
   exit 1
 fi
 
+if [ ! -e "$WITNESS_FILE" ] ; then
+  echo "INVALID WITNESS FILE: witness file $WITNESS_FILE does not exist"
+  exit 1
+fi
+
 if [ ! -s "$WITNESS_FILE" ] ; then
   echo "INVALID WITNESS FILE: witness file $WITNESS_FILE is empty"
   exit 1
