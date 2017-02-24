@@ -177,13 +177,14 @@ def processWitness(witness, benchmark, bitwidth):
   n = entryNode
   while trace[n].get('target') is not None:
     if trace[n].get('assumption') is not None:
-      f = trace[n].get('assumption.scope')
-      assert f is not None
-      wrapped = 'void foo() { ' + trace[n]['assumption'] + '}'
+      # assumptions may use = or ==
+      a = re.sub(r'==', '=', trace[n]['assumption'])
+      wrapped = 'void foo() { ' + a + '}'
       a_ast = parser.parse(wrapped).ext[0].body.block_items[0]
       if isinstance(a_ast, c_ast.Assignment):
+        f = trace[n].get('assumption.scope')
         v = c_generator.CGenerator().visit(a_ast.rvalue)
-        if inputs[f].get(a_ast.lvalue.name) is not None:
+        if f is not None and inputs[f].get(a_ast.lvalue.name) is not None:
           values.append([f, a_ast.lvalue.name, v])
         elif watch.get(int(trace[n]['startline'])) is not None:
           w = watch[int(trace[n]['startline'])]
@@ -197,12 +198,13 @@ def processWitness(witness, benchmark, bitwidth):
 
     n = trace[n]['target']
 
-  # print('watch: ')
-  # print(watch)
-  # print('inputs: ')
-  # print(inputs)
-  # print('nondets: ')
-  # print(nondets)
+  if not values:
+    print('watch: ')
+    print(watch)
+    print('inputs: ')
+    print(inputs)
+    print('nondets: ')
+    print(nondets)
   assert values
   print('IN:')
   print('  ENTRY {n}()@[file {f} line {l}]'.format(
