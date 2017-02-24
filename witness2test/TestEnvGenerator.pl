@@ -285,6 +285,7 @@ print TESTER <<EOF;
 #include <assert.h>
 
 void __VERIFIER_error() { assert(0); }
+void __VERIFIER_assume(int expression) { while(!expression) {} }
 
 unsigned __fshell2__tc_selector;
 EOF
