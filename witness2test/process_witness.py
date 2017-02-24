@@ -180,6 +180,7 @@ def processWitness(witness, benchmark, bitwidth):
     if trace[n].get('assumption') is not None:
       # assumptions may use = or ==
       a = re.sub(r'==', '=', trace[n]['assumption'])
+      a = re.sub(r'\\result', '__SV_COMP_result', a)
       wrapped = 'void foo() { ' + a + '}'
       a_ast = parser.parse(wrapped).ext[0].body.block_items[0]
       if isinstance(a_ast, c_ast.Assignment):
