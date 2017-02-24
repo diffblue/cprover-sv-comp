@@ -162,7 +162,7 @@ def processWitness(witness, benchmark, bitwidth):
       inAttribute = False
       for line in b:
         # remove __attribute__
-        # line = re.sub(r'__attribute__\s*\(\(\s*[a-z_, ]+\s*\)\)\s*', '', line)
+        line = re.sub(r'__attribute__\s*\(\(\s*[a-z_, ]+\s*\)\)\s*', '', line)
         # line = re.sub(r'__attribute__\s*\(\(\s*[a-z_, ]+\s*\(\s*[a-zA-Z0-9_, "\.]+\s*\)\s*\)\)\s*', '', line)
         # line = re.sub(r'__attribute__\s*\(\(\s*[a-z_, ]+\s*\(\s*sizeof\s*\([a-z ]+\)\s*\)\s*\)\)\s*', '', line)
         # line = re.sub(r'__attribute__\s*\(\(\s*[a-z_, ]+\s*\(\s*\([0-9]+\)\s*<<\s*\([0-9]+\)\s*\)\s*\)\)\s*', '', line)
