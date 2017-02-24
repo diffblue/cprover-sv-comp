@@ -6,7 +6,9 @@ from pycparser import c_ast, c_generator, c_parser, parse_file
 import argparse
 import hashlib
 import re
+import subprocess
 import sys
+import tempfile
 #import xml.etree.CElementTree as ElementTree
 import xml.etree.ElementTree as ElementTree
 
@@ -139,11 +141,18 @@ def processWitness(witness, benchmark, bitwidth):
   entryFun = validateConfig(graph, ns, witness, benchmark, bitwidth)
 
   benchmarkString = ''
-  with open(benchmark, 'r') as b:
-    for line in b:
-      line = re.sub(r'__attribute__\s*\(\(\s*[a-z_]+\s*\)\)\s*;', ';', line)
-      line = re.sub(r'//.*', '', line)
-      benchmarkString += line
+  with tempfile.NamedTemporaryFile() as fp:
+    if benchmark.endswith('c'):
+      subprocess.check_call(['gcc', '-E', benchmark, '-o', fp.name])
+      benchmark = fp.name
+    with open(benchmark, 'r') as b:
+      for line in b:
+        line = re.sub(r'__attribute__\s*\(\(\s*[a-z_]+\s*\)\)\s*;', ';', line)
+        line = re.sub(r'__restrict', 'restrict', line)
+        line = re.sub(r'__inline', 'inline', line)
+        #line = re.sub(r'//.*', '', line)
+        #line = re.sub(r'/\*[^\*/]+\*/', '', line)
+        benchmarkString += line
   parser = c_parser.CParser()
   ast = parser.parse(benchmarkString, filename=benchmark)
   # ast.show(showcoord=True)
