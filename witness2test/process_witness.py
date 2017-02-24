@@ -153,11 +153,11 @@ def processWitness(witness, benchmark, bitwidth):
       benchmark = fp.name
     with open(benchmark, 'r') as b:
       for line in b:
-        line = re.sub(r'__attribute__\s*\(\(\s*[a-z_]+\s*\)\)\s*;', ';', line)
+        line = re.sub(r'__attribute__\s*\(\(\s*[a-z_, ]+\s*\)\)\s*', '', line)
+        line = re.sub(r'__attribute__\s*\(\(\s*[a-z_, ]+\s*\(\s*[a-zA-Z0-9_, ]+\s*\)\s*\)\)\s*', '', line)
+        line = re.sub(r'__extension__', '', line)
         line = re.sub(r'__restrict', 'restrict', line)
         line = re.sub(r'__inline', 'inline', line)
-        #line = re.sub(r'//.*', '', line)
-        #line = re.sub(r'/\*[^\*/]+\*/', '', line)
         benchmarkString += line
   parser = c_parser.CParser()
   ast = parser.parse(benchmarkString, filename=benchmark)
