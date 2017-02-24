@@ -159,9 +159,21 @@ def processWitness(witness, benchmark, bitwidth):
     with open(benchmarkFile, 'r') as b:
       needStructBody = False
       skipAsm = False
+      inAttribute = False
       for line in b:
-        line = re.sub(r'__attribute__\s*\(\(\s*[a-z_, ]+\s*\)\)\s*', '', line)
-        line = re.sub(r'__attribute__\s*\(\(\s*[a-z_, ]+\s*\(\s*[a-zA-Z0-9_, ]+\s*\)\s*\)\)\s*', '', line)
+        # remove __attribute__
+        # line = re.sub(r'__attribute__\s*\(\(\s*[a-z_, ]+\s*\)\)\s*', '', line)
+        # line = re.sub(r'__attribute__\s*\(\(\s*[a-z_, ]+\s*\(\s*[a-zA-Z0-9_, "\.]+\s*\)\s*\)\)\s*', '', line)
+        # line = re.sub(r'__attribute__\s*\(\(\s*[a-z_, ]+\s*\(\s*sizeof\s*\([a-z ]+\)\s*\)\s*\)\)\s*', '', line)
+        # line = re.sub(r'__attribute__\s*\(\(\s*[a-z_, ]+\s*\(\s*\([0-9]+\)\s*<<\s*\([0-9]+\)\s*\)\s*\)\)\s*', '', line)
+        line = re.sub(r'__attribute__\s*\(\(.*\)\)\s*', '', line)
+        if re.search(r'__attribute__\s*\(\(', line):
+          line = re.sub(r'__attribute__\s*\(\(.*', '', line)
+          inAttribute = True
+        elif inAttribute:
+          line = re.sub(r'.*\)\)', '', line)
+          inAttribute = False
+        # rewrite some GCC extensions
         line = re.sub(r'__extension__', '', line)
         line = re.sub(r'__restrict', 'restrict', line)
         line = re.sub(r'__inline', 'inline', line)
