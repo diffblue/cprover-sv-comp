@@ -84,7 +84,7 @@ PYTHONPATH=$SCRIPTDIR/pycparser-master \
   $BIT_WIDTH -w "$WITNESS_FILE" -b "$BM" > data
 $SCRIPTDIR/TestEnvGenerator.pl < data
 ec=0
-make -f tester.mk BUILD_FLAGS="$BIT_WIDTH -std=c99" > log 2>&1 || ec=$?
+make -f tester.mk BUILD_FLAGS="-g $BIT_WIDTH -std=c99" > log 2>&1 || ec=$?
 if [ "$PROP" = "unreach_call" ] ; then
   if ! grep -q "tester: .* __VERIFIER_error: Assertion \`0' failed." log ; then
     cat log 1>&2
