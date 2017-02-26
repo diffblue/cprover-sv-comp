@@ -40,8 +40,9 @@ def validateConfig(graph, ns, witness, benchmark, bitwidth):
   with open(benchmark, 'rb') as b:
     sha1hash = hashlib.sha1(b.read()).hexdigest()
     if config['programhash'] != sha1hash:
-      eprint('INVALID WITNESS FILE: SHA1 mismatch')
-      sys.exit(1)
+      # eprint('INVALID WITNESS FILE: SHA1 mismatch')
+      # sys.exit(1)
+      eprint('warning: SHA1 mismatch')
 
   spec = re.sub(r'\s+', '', config['specification'])
   return re.sub(r'CHECK\(init\((\S+)\(\)\),LTL\((\S+)\)\)', '\g<1>', spec)
