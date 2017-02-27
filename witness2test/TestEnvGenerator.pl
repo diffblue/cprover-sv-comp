@@ -259,6 +259,7 @@ foreach my $f (keys %all_edits) {
     print MAKEFILE "\tmv \$\@ \$\@_\n";
     print MAKEFILE "\techo '#include <math.h>' >> \$\@\n";
     print MAKEFILE "\techo '$_' >> \$\@\n" foreach(@{ $inserts{$f} });
+    print MAKEFILE "\tcp \$\@ harness.c\n";
     print MAKEFILE "\tcat \$\@_ >> \$\@\n";
     print MAKEFILE "\trm \$\@_\n";
   }
