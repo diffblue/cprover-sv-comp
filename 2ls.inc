@@ -14,7 +14,7 @@ run()
     
     # run the tool
     $TOOL_BINARY --graphml-witness $LOG.witness $BIT_WIDTH $PROPERTY \
-      --function $ENTRY $BM >> $LOG.ok 2>&1 #&
+      --function $ENTRY $BM >> $LOG.ok 2>&1 &
     $TOOL_BINARY --graphml-witness $LOG.witness $BIT_WIDTH $PROPERTY2 \
       --function $ENTRY $BM >> $LOG.ok 2>&1 &
     wait -n
