@@ -1,16 +1,14 @@
-# tool 
+# tool
 
 TOOL_BINARY=./cbmc-binary
 TOOL_NAME=CBMC
 
 # function to run the tool
 
-run() 
+run()
 {
   if [ "$PROP" = "termination" ] ; then
-    EC=42
-    echo "EC=$EC" >> $LOG.ok
-    return
+    PROPERTY="$PROPERTY --no-assertions"
   fi
 
 timeout 850 bash -c ' \
