@@ -1,6 +1,6 @@
 CBMC=../cbmc
 2LS=../2ls
-YEAR=2017
+YEAR=2018
 
 all: cbmc 2ls
 
