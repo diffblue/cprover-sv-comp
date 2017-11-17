@@ -44,7 +44,7 @@ parse_result()
       grep -Eq "^(\[.*\] free argument has offset zero|[[:space:]]* free argument has offset zero$)" ; then
     echo 'FALSE(valid-free)'
   elif tail -n 50 $LOG.ok | \
-      grep -Eq "^(\[.*\] |[[:space:]]*)free argument is dynamic object" ; then
+      grep -Eq "^(\[.*\] |[[:space:]]*)free argument (is|must be) dynamic object" ; then
     echo 'FALSE(valid-free)'
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] |[[:space:]]*)arithmetic overflow on signed" ; then
