@@ -54,7 +54,7 @@ run()
       fi
     fi
   else
-    PROPERTY="$PROPERTY --k-induction --competition-mode"
+    PROPERTY="$PROPERTY --heap-interval --k-induction --competition-mode"
 
     # run the tool
     $TOOL_BINARY --graphml-witness $LOG.witness $BIT_WIDTH $PROPERTY \
