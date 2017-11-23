@@ -74,6 +74,7 @@ process_graphml()
   fi
 }
 
+OBJ_BITS="10"
 BIT_WIDTH="--64"
 BM=""
 PROP_FILE=""
