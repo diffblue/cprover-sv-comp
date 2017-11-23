@@ -4,9 +4,9 @@ YEAR=2018
 
 all: cbmc 2ls
 
-cbmc: CBMC-sv-comp-$(YEAR).zip
+cbmc: cbmc.zip
 
-2ls: 2ls-sv-comp-$(YEAR).zip
+2ls: 2ls.zip
 
 .PHONY: cbmc 2ls
 
@@ -15,7 +15,7 @@ cbmc: CBMC-sv-comp-$(YEAR).zip
 	cat $*.inc tool-wrapper.inc >> $@
 	chmod 755 $@
 
-CBMC-sv-comp-$(YEAR).zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc
+cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc
 	mkdir -p $(basename $@)
 	$(MAKE) cbmc-wrapper
 	mv cbmc-wrapper $(basename $@)/cbmc
@@ -26,7 +26,7 @@ CBMC-sv-comp-$(YEAR).zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/
 	cd $(basename $@) && rm cbmc cbmc-binary LICENSE
 	rmdir $(basename $@)
 
-2ls-sv-comp-$(YEAR).zip: 2ls.inc tool-wrapper.inc $(2LS)/LICENSE $(2LS)/src/2ls/2ls
+2ls.zip: 2ls.inc tool-wrapper.inc $(2LS)/LICENSE $(2LS)/src/2ls/2ls
 	mkdir -p $(basename $@)
 	$(MAKE) 2ls-wrapper
 	mv 2ls-wrapper $(basename $@)/2ls
