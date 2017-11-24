@@ -111,6 +111,7 @@ else
   PROPERTY=${OPTIONS[$PROP]}
 fi
 
+export OBJ_BITS
 export ENTRY
 export PROPERTY
 export BIT_WIDTH
