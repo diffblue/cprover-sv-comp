@@ -116,6 +116,7 @@ export PROPERTY
 export BIT_WIDTH
 export BM
 export PROP
+export OBJ_BITS
 
 export GMON_OUT_PREFIX=`basename $BM`.gmon.out
 
