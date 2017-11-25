@@ -41,7 +41,7 @@ parse_result()
       grep -Eq "^(\[.*\] double free|[[:space:]]*double free$)" ; then
     echo 'FALSE(valid-free)'
   elif tail -n 50 $LOG.ok | \
-      grep -Eq "^(\[.*\] free argument has offset zero|[[:space:]]* free argument has offset zero$)" ; then
+      grep -Eq "^(\[.*\] free argument has offset zero|[[:space:]]* free argument has offset zero$)|[[:space:]]* free argument must be dynamic object" ; then
     echo 'FALSE(valid-free)'
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] |[[:space:]]*)free argument (is|must be) dynamic object" ; then
