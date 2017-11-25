@@ -11,7 +11,7 @@ run()
     PROPERTY="$PROPERTY --no-assertions"
   fi
 
-timeout 850 bash -c ' \
+timeout 875 bash -c ' \
 \
 ulimit -v 15000000 ; \
 \
