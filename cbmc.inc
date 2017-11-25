@@ -8,7 +8,7 @@ TOOL_NAME=CBMC
 run()
 {
   if [ "$PROP" = "termination" ] ; then
-    PROPERTY="$PROPERTY --no-assertions"
+    PROPERTY="$PROPERTY --no-assertions --no-self-loops-to-assumptions"
   fi
 
 timeout 875 bash -c ' \
