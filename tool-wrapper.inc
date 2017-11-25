@@ -74,7 +74,7 @@ process_graphml()
   fi
 }
 
-OBJ_BITS="10"
+OBJ_BITS="11"
 BIT_WIDTH="--64"
 BM=""
 PROP_FILE=""
@@ -116,6 +116,7 @@ export PROPERTY
 export BIT_WIDTH
 export BM
 export PROP
+export OBJ_BITS
 
 export GMON_OUT_PREFIX=`basename $BM`.gmon.out
 

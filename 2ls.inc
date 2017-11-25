@@ -13,10 +13,10 @@ run()
     PROPERTY2="$PROPERTY --nontermination --competition-mode"
 
     # run the termination and nontermination analysis in parallel
-    $TOOL_BINARY --graphml-witness $LOG.witness $BIT_WIDTH --object-bits OBJ_BITS $PROPERTY1 \
+    $TOOL_BINARY --graphml-witness $LOG.witness $BIT_WIDTH --object-bits $OBJ_BITS $PROPERTY1 \
       --function $ENTRY $BM >> $LOG.ok1 2>&1 &
     PID1="$!"
-    $TOOL_BINARY --graphml-witness $LOG.witness $BIT_WIDTH --object-bits OBJ_BITS $PROPERTY2 \
+    $TOOL_BINARY --graphml-witness $LOG.witness $BIT_WIDTH --object-bits $OBJ_BITS $PROPERTY2 \
       --function $ENTRY $BM >> $LOG.ok2 2>&1 &
     PID2="$!"
     # this might not work in all environments
@@ -57,7 +57,7 @@ run()
     PROPERTY="$PROPERTY --heap-interval --k-induction --competition-mode"
 
     # run the tool
-    $TOOL_BINARY --graphml-witness $LOG.witness $BIT_WIDTH --object-bits OBJ_BITS $PROPERTY \
+    $TOOL_BINARY --graphml-witness $LOG.witness $BIT_WIDTH --object-bits $OBJ_BITS $PROPERTY \
       --function $ENTRY $BM >> $LOG.ok 2>&1
 
     # store the exit code
