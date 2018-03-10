@@ -1,14 +1,17 @@
 CBMC=../cbmc
 2LS=../2ls
+JBMC=../cbmc
 YEAR=2018
 
-all: cbmc 2ls
+all: cbmc 2ls jbmc
 
 cbmc: cbmc.zip
 
 2ls: 2ls.zip
 
-.PHONY: cbmc 2ls
+jbmc: jbmc.zip
+
+.PHONY: cbmc 2ls jbmc
 
 %-wrapper: %.inc tool-wrapper.inc
 	echo "#!/bin/bash" > $@
@@ -35,4 +38,15 @@ cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
 	cd $(basename $@) && rm 2ls 2ls-binary LICENSE
+	rmdir $(basename $@)
+
+jbmc.zip: jbmc.inc tool-wrapper.inc $(JBMC)/LICENSE $(JBMC)/src/jbmc/jbmc
+	mkdir -p $(basename $@)
+	$(MAKE) jbmc-wrapper
+	mv jbmc-wrapper $(basename $@)/jbmc
+	cp $(JBMC)/LICENSE $(basename $@)/
+	cp $(JBMC)/src/jbmc/jbmc $(basename $@)/jbmc-binary
+	chmod a+rX $(basename $@)/*
+	zip -r $@ $(basename $@)
+	cd $(basename $@) && rm jbmc jbmc-binary LICENSE
 	rmdir $(basename $@)
