@@ -33,6 +33,9 @@ parse_result()
       grep -Eq "^(\[.*\] .*__CPROVER_memory_leak == NULL|[[:space:]]*__CPROVER_memory_leak == NULL$)" ; then
     echo 'FALSE(valid-memtrack)'
   elif tail -n 50 $LOG.ok | \
+      grep -Eq "^(\[.*\] |[[:space:]]*)dynamically allocated memory never freed in " ; then
+    echo 'FALSE(valid-memtrack)'
+  elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] |[[:space:]]*)dereference failure:" ; then
     echo 'FALSE(valid-deref)'
   elif tail -n 50 $LOG.ok | \
