@@ -18,26 +18,28 @@ jbmc: jbmc.zip
 	cat $*.inc tool-wrapper.inc >> $@
 	chmod 755 $@
 
-cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc
+cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC)/src/goto-cc/goto-cc
 	mkdir -p $(basename $@)
 	$(MAKE) cbmc-wrapper
 	mv cbmc-wrapper $(basename $@)/cbmc
 	cp $(CBMC)/LICENSE $(basename $@)/
 	cp $(CBMC)/src/cbmc/cbmc $(basename $@)/cbmc-binary
+	cp $(CBMC)/src/goto-cc/goto-cc $(basename $@)/
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
-	cd $(basename $@) && rm cbmc cbmc-binary LICENSE
+	cd $(basename $@) && rm cbmc cbmc-binary goto-cc LICENSE
 	rmdir $(basename $@)
 
-2ls.zip: 2ls.inc tool-wrapper.inc $(2LS)/LICENSE $(2LS)/src/2ls/2ls
+2ls.zip: 2ls.inc tool-wrapper.inc $(2LS)/LICENSE $(2LS)/src/2ls/2ls $(2LS)/src/goto-cc/goto-cc
 	mkdir -p $(basename $@)
 	$(MAKE) 2ls-wrapper
 	mv 2ls-wrapper $(basename $@)/2ls
 	cp $(2LS)/LICENSE $(basename $@)/
 	cp $(2LS)/src/2ls/2ls $(basename $@)/2ls-binary
+	cp $(2LS)/src/goto-cc/goto-cc $(basename $@)/
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
-	cd $(basename $@) && rm 2ls 2ls-binary LICENSE
+	cd $(basename $@) && rm 2ls 2ls-binary goto-cc LICENSE
 	rmdir $(basename $@)
 
 jbmc.zip: jbmc.inc tool-wrapper.inc $(JBMC)/LICENSE $(JBMC)/src/jbmc/jbmc
