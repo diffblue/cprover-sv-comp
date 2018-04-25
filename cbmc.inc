@@ -11,6 +11,11 @@ run()
     PROPERTY="$PROPERTY --no-assertions --no-self-loops-to-assumptions"
   fi
 
+  gmon_suffix=$GMON_OUT_PREFIX
+  export GMON_OUT_PREFIX="goto-cc_$gmon_suffix"
+  ./goto-cc -m$BIT_WIDTH --function $ENTRY $BM -o $LOG.bin
+
+  export GMON_OUT_PREFIX="cbmc_$gmon_suffix"
 timeout 875 bash -c ' \
 \
 ulimit -v 15000000 ; \
@@ -18,11 +23,11 @@ ulimit -v 15000000 ; \
 EC=42 ; \
 for c in 2 6 12 17 21 40 200 400 1025 2049 268435456 ; do \
 echo "Unwind: $c" > $LOG.latest ; \
-./cbmc-binary --graphml-witness $LOG.witness --unwind $c --stop-on-fail $BIT_WIDTH --object-bits $OBJ_BITS $PROPERTY --function $ENTRY $BM >> $LOG.latest 2>&1 ; \
+./cbmc-binary --graphml-witness $LOG.witness --unwind $c --stop-on-fail --object-bits $OBJ_BITS $PROPERTY $LOG.bin >> $LOG.latest 2>&1 ; \
 ec=$? ; \
 if [ $ec -eq 0 ] ; then \
 if ! tail -n 10 $LOG.latest | grep -q "^VERIFICATION SUCCESSFUL$" ; then ec=1 ; else \
-./cbmc-binary --unwinding-assertions --unwind $c --stop-on-fail $BIT_WIDTH --object-bits $OBJ_BITS $PROPERTY --function $ENTRY $BM > /dev/null 2>&1 || ec=42 ; \
+./cbmc-binary --unwinding-assertions --unwind $c --stop-on-fail --object-bits $OBJ_BITS $PROPERTY $LOG.bin > /dev/null 2>&1 || ec=42 ; \
 fi ; \
 fi ; \
 if [ $ec -eq 10 ] ; then \

@@ -7,17 +7,22 @@ TOOL_NAME=2LS
 
 run()
 {
+  gmon_suffix=$GMON_OUT_PREFIX
+  export GMON_OUT_PREFIX="goto-cc_$gmon_suffix"
+  ./goto-cc -m$BIT_WIDTH --function $ENTRY $BM -o $LOG.bin
+
+  export GMON_OUT_PREFIX="2ls_$gmon_suffix"
   # add property-specific options
   if [[ "$PROP" == "termination" ]]; then
     PROPERTY1="$PROPERTY --termination --competition-mode"
     PROPERTY2="$PROPERTY --nontermination --competition-mode"
 
     # run the termination and nontermination analysis in parallel
-    $TOOL_BINARY --graphml-witness $LOG.witness $BIT_WIDTH --object-bits $OBJ_BITS $PROPERTY1 \
-      --function $ENTRY $BM >> $LOG.ok1 2>&1 &
+    $TOOL_BINARY --graphml-witness $LOG.witness --object-bits $OBJ_BITS $PROPERTY1 \
+      $LOG.bin >> $LOG.ok1 2>&1 &
     PID1="$!"
-    $TOOL_BINARY --graphml-witness $LOG.witness $BIT_WIDTH --object-bits $OBJ_BITS $PROPERTY2 \
-      --function $ENTRY $BM >> $LOG.ok2 2>&1 &
+    $TOOL_BINARY --graphml-witness $LOG.witness --object-bits $OBJ_BITS $PROPERTY2 \
+      $LOG.bin >> $LOG.ok2 2>&1 &
     PID2="$!"
     # this might not work in all environments
     wait -n &> /dev/null
@@ -57,8 +62,8 @@ run()
     PROPERTY="$PROPERTY --heap-interval --k-induction --competition-mode"
 
     # run the tool
-    $TOOL_BINARY --graphml-witness $LOG.witness $BIT_WIDTH --object-bits $OBJ_BITS $PROPERTY \
-      --function $ENTRY $BM >> $LOG.ok 2>&1
+    $TOOL_BINARY --graphml-witness $LOG.witness --object-bits $OBJ_BITS $PROPERTY \
+      $LOG.bin >> $LOG.ok 2>&1
 
     # store the exit code
     EC=$?

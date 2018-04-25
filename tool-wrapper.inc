@@ -74,19 +74,19 @@ process_graphml()
       <data key=\"specification\">$(<$PROP_FILE)<\/data>
       <data key=\"programfile\">$(echo $BM | sed 's8/8\\/8g')<\/data>
       <data key=\"programhash\">$(sha1sum $BM | awk '{print $1}')<\/data>
-      <data key=\"architecture\">${BIT_WIDTH##--}bit<\/data>\\Q/"
+      <data key=\"architecture\">${BIT_WIDTH}bit<\/data>\\Q/"
   fi
 }
 
 OBJ_BITS="11"
-BIT_WIDTH="--64"
+BIT_WIDTH="64"
 BM=""
 PROP_FILE=""
 WITNESS_FILE=""
 
 while [ -n "$1" ] ; do
   case "$1" in
-    --32|--64) BIT_WIDTH="$1" ; shift 1 ;;
+    --32|--64) BIT_WIDTH="${1##--}" ; shift 1 ;;
     --propertyfile) PROP_FILE="$2" ; shift 2 ;;
     --graphml-witness) WITNESS_FILE="$2" ; shift 2 ;;
     --version) $TOOL_BINARY --version ; exit 0 ;;
@@ -125,7 +125,7 @@ export OBJ_BITS
 export GMON_OUT_PREFIX=`basename $BM`.gmon.out
 
 export LOG=`mktemp -t ${TOOL_NAME}-log.XXXXXX`
-trap "rm -f $LOG $LOG.latest $LOG.ok $LOG.witness" EXIT
+trap "rm -f $LOG $LOG.latest $LOG.ok $LOG.witness $LOG.bin" EXIT
 
 run
 
