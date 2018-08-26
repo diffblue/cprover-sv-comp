@@ -124,8 +124,10 @@ export OBJ_BITS
 
 export GMON_OUT_PREFIX=`basename $BM`.gmon.out
 
+export BM_DIR=`mktemp -d -t ${TOOL_NAME}-benchmark.XXXXXX`
+
 export LOG=`mktemp -t ${TOOL_NAME}-log.XXXXXX`
-trap "rm -f $LOG $LOG.latest $LOG.ok $LOG.witness $LOG.bin" EXIT
+trap "rm -rf $LOG $LOG.latest $LOG.ok $LOG.witness $LOG.bin $BM_DIR" EXIT
 
 run
 

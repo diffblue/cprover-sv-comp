@@ -7,6 +7,12 @@ TOOL_NAME=JBMC
 
 run()
 {
+  unzip $BM -d $BM_DIR
+  make -C $BM_DIR
+  BM=$BM_DIR/target/task.jar
+
+  MORE_OPTIONS="--throw-runtime-exceptions --max-nondet-string-length 100 --classpath core-models.jar"
+
   if [ "$PROP" = "termination" ] ; then
     PROPERTY="$PROPERTY --no-assertions --no-self-loops-to-assumptions"
   fi
@@ -18,11 +24,11 @@ ulimit -v 15000000 ; \
 EC=42 ; \
 for c in 2 6 12 17 21 40 200 400 1025 2049 268435456 ; do \
 echo "Unwind: $c" > $LOG.latest ; \
-./jbmc-binary --graphml-witness $LOG.witness --unwind $c --stop-on-fail --$BIT_WIDTH --object-bits $OBJ_BITS $PROPERTY --function $ENTRY $BM >> $LOG.latest 2>&1 ; \
+./jbmc-binary $MORE_OPTIONS --graphml-witness $LOG.witness --unwind $c --stop-on-fail --$BIT_WIDTH --object-bits $OBJ_BITS $PROPERTY --function $ENTRY $BM >> $LOG.latest 2>&1 ; \
 ec=$? ; \
 if [ $ec -eq 0 ] ; then \
 if ! tail -n 10 $LOG.latest | grep -q "^VERIFICATION SUCCESSFUL$" ; then ec=1 ; else \
-./jbmc-binary --unwinding-assertions --unwind $c --stop-on-fail --$BIT_WIDTH --object-bits $OBJ_BITS $PROPERTY --function $ENTRY $BM > /dev/null 2>&1 || ec=42 ; \
+./jbmc-binary $MORE_OPTIONS --unwinding-assertions --unwind $c --stop-on-fail --$BIT_WIDTH --object-bits $OBJ_BITS $PROPERTY --function $ENTRY $BM > /dev/null 2>&1 || ec=42 ; \
 fi ; \
 fi ; \
 if [ $ec -eq 10 ] ; then \
