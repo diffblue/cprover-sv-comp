@@ -59,3 +59,24 @@ gprof --sum ./cbmc-binary *.gmon.out.*
 gprof ./cbmc-profiling gmon.sum > sum.profile
 rm gmon.out *.gmon.out.*
 ```
+
+#### Passing custom flags to CBMC
+
+The wrapper script hard-codes most of the flags that are passed in to
+CBMC. If you want to add more flags, for example to run experiments with
+different configurations of CBMC, you can pass those flags as a single
+value to the `--other-flags` flag of the wrapper script.
+
+When running `benchexec`, you will need to set this flag by writing it
+into the `cbmc.xml` file as an option, either at the global level or for
+one particular task:
+```xml
+...
+  <rundefinition name="sv-comp18"></rundefinition>
+
+  <option name="--graphml-witness">${logfile_path_abs}${inputfile_name}-witness.graphml</option>
+
+<!-- Add your custom options here: -->
+
+  <option name="--other-options"> --verbosity 10 --bogosity 15 --solve-halting-problem</option>
+```

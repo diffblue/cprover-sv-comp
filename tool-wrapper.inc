@@ -89,6 +89,7 @@ while [ -n "$1" ] ; do
     --32|--64) BIT_WIDTH="${1##--}" ; shift 1 ;;
     --propertyfile) PROP_FILE="$2" ; shift 2 ;;
     --graphml-witness) WITNESS_FILE="$2" ; shift 2 ;;
+    --other-options) OTHER_OPTIONS="$2" ; shift 2 ;;
     --version) $TOOL_BINARY --version ; exit 0 ;;
     *) BM="$1" ; shift 1 ;;
   esac
@@ -121,6 +122,7 @@ export BIT_WIDTH
 export BM
 export PROP
 export OBJ_BITS
+export OTHER_OPTIONS
 
 export GMON_OUT_PREFIX=`basename $BM`.gmon.out
 
