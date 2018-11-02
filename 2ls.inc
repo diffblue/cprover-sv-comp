@@ -59,7 +59,7 @@ run()
       fi
     fi
   else
-    PROPERTY="$PROPERTY --heap-interval --k-induction --competition-mode"
+    PROPERTY="$PROPERTY --heap-values-refine --sympath --k-induction --competition-mode"
 
     # run the tool
     $TOOL_BINARY --graphml-witness $LOG.witness --object-bits $OBJ_BITS $PROPERTY \
