@@ -2,6 +2,7 @@
 
 TOOL_BINARY=./cbmc-binary
 TOOL_NAME=CBMC
+FIND_OPTIONS=""
 
 # function to run the tool
 
@@ -13,7 +14,7 @@ run()
 
   gmon_suffix=$GMON_OUT_PREFIX
   export GMON_OUT_PREFIX="goto-cc_$gmon_suffix"
-  ./goto-cc -m$BIT_WIDTH --function $ENTRY $BM -o $LOG.bin
+  ./goto-cc -m$BIT_WIDTH --function $ENTRY "${BM[@]}" -o $LOG.bin
 
   export GMON_OUT_PREFIX="cbmc_$gmon_suffix"
 timeout 875 bash -c ' \

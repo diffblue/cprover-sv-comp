@@ -2,6 +2,7 @@
 
 TOOL_BINARY=./2ls-binary
 TOOL_NAME=2LS
+FIND_OPTIONS=""
 
 # function to run the tool
 
@@ -9,7 +10,7 @@ run()
 {
   gmon_suffix=$GMON_OUT_PREFIX
   export GMON_OUT_PREFIX="goto-cc_$gmon_suffix"
-  ./goto-cc -m$BIT_WIDTH --function $ENTRY $BM -o $LOG.bin
+  ./goto-cc -m$BIT_WIDTH --function $ENTRY "${BM[@]}" -o $LOG.bin
 
   export GMON_OUT_PREFIX="2ls_$gmon_suffix"
   # add property-specific options

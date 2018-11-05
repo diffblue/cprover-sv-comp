@@ -72,15 +72,16 @@ process_graphml()
       <data key=\"witness-type\">$(echo $TYPE)<\/data>
       <data key=\"producer\">$(echo $TOOL_NAME)<\/data>
       <data key=\"specification\">$(<$PROP_FILE)<\/data>
-      <data key=\"programfile\">$(echo $BM | sed 's8/8\\/8g')<\/data>
-      <data key=\"programhash\">$(sha1sum $BM | awk '{print $1}')<\/data>
+      <data key=\"programfile\">$(echo ${BM[0]} | sed 's8/8\\/8g')<\/data>
+      <data key=\"programhash\">$(sha1sum ${BM[0]} | awk '{print $1}')<\/data>
       <data key=\"architecture\">${BIT_WIDTH}bit<\/data>\\Q/"
   fi
 }
 
 OBJ_BITS="11"
 BIT_WIDTH="64"
-BM=""
+declare -a BM
+BM=()
 PROP_FILE=""
 WITNESS_FILE=""
 
@@ -90,16 +91,16 @@ while [ -n "$1" ] ; do
     --propertyfile) PROP_FILE="$2" ; shift 2 ;;
     --graphml-witness) WITNESS_FILE="$2" ; shift 2 ;;
     --version) $TOOL_BINARY --version ; exit 0 ;;
-    *) BM="$1" ; shift 1 ;;
+    *) SRC=(`eval "find $1 $FIND_OPTIONS"`) ; BM=("${BM[@]}" "${SRC[@]}") ; shift 1 ;;
   esac
 done
 
-if [ -z "$BM" ] || [ -z "$PROP_FILE" ] ; then
+if [ -z "${BM[0]}" ] || [ -z "$PROP_FILE" ] ; then
   echo "Missing benchmark or property file"
   exit 1
 fi
 
-if [ ! -s "$BM" ] || [ ! -s "$PROP_FILE" ] ; then
+if [ ! -s "${BM[0]}" ] || [ ! -s "$PROP_FILE" ] ; then
   echo "Empty benchmark or property file"
   exit 1
 fi
@@ -122,7 +123,7 @@ export BM
 export PROP
 export OBJ_BITS
 
-export GMON_OUT_PREFIX=`basename $BM`.gmon.out
+export GMON_OUT_PREFIX=`basename ${BM[0]}`.gmon.out
 
 export BM_DIR=`mktemp -d -t ${TOOL_NAME}-benchmark.XXXXXX`
 
