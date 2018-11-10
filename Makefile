@@ -42,13 +42,14 @@ cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC
 	cd $(basename $@) && rm 2ls 2ls-binary goto-cc LICENSE
 	rmdir $(basename $@)
 
-jbmc.zip: jbmc.inc tool-wrapper.inc $(JBMC)/LICENSE $(JBMC)/jbmc/src/jbmc/jbmc
+jbmc.zip: jbmc.inc tool-wrapper.inc $(JBMC)/LICENSE $(JBMC)/jbmc/src/jbmc/jbmc $(JBMC)/jbmc/lib/java-models-library/target/core-models.jar
 	mkdir -p $(basename $@)
 	$(MAKE) jbmc-wrapper
 	mv jbmc-wrapper $(basename $@)/jbmc
 	cp $(JBMC)/LICENSE $(basename $@)/
 	cp $(JBMC)/jbmc/src/jbmc/jbmc $(basename $@)/jbmc-binary
+	cp $(JBMC)/jbmc/lib/java-models-library/target/core-models.jar $(basename $@)/
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
-	cd $(basename $@) && rm jbmc jbmc-binary LICENSE
+	cd $(basename $@) && rm jbmc jbmc-binary core-models.jar LICENSE
 	rmdir $(basename $@)
