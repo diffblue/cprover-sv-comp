@@ -10,16 +10,18 @@ If you you want to build the wrapper script only, use
 
 `make` tool`-wrapper`
 
-where tool is `cbmc` or `2ls`.
+where tool is `cbmc`, `jbmc` or `2ls`.
 
 #### Benchexec tool script
 
 * CBMC: https://github.com/sosy-lab/benchexec/blob/master/benchexec/tools/cbmc.py
+* JBMC: https://github.com/sosy-lab/benchexec/blob/master/benchexec/tools/jbmc.py
 * 2LS: https://github.com/sosy-lab/benchexec/blob/master/benchexec/tools/two_ls.py
 
 #### Benchexec benchmark definition
 
 * CBMC: https://github.com/sosy-lab/sv-comp/blob/master/benchmark-defs/cbmc.xml
+* JBMC: https://github.com/sosy-lab/sv-comp/blob/master/benchmark-defs/jbmc.xml
 * 2LS: https://github.com/sosy-lab/sv-comp/blob/master/benchmark-defs/2ls.xml
 
 #### License
