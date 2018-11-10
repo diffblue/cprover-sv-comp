@@ -42,12 +42,12 @@ cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC
 	cd $(basename $@) && rm 2ls 2ls-binary goto-cc LICENSE
 	rmdir $(basename $@)
 
-jbmc.zip: jbmc.inc tool-wrapper.inc $(JBMC)/LICENSE $(JBMC)/src/jbmc/jbmc
+jbmc.zip: jbmc.inc tool-wrapper.inc $(JBMC)/LICENSE $(JBMC)/jbmc/src/jbmc
 	mkdir -p $(basename $@)
 	$(MAKE) jbmc-wrapper
 	mv jbmc-wrapper $(basename $@)/jbmc
 	cp $(JBMC)/LICENSE $(basename $@)/
-	cp $(JBMC)/src/jbmc/jbmc $(basename $@)/jbmc-binary
+	cp $(JBMC)/jbmc/src/jbmc/jbmc $(basename $@)/jbmc-binary
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
 	cd $(basename $@) && rm jbmc jbmc-binary LICENSE
