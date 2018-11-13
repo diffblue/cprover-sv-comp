@@ -10,6 +10,7 @@ OPTIONS["unreach_call"]=""
 OPTIONS["termination"]=""
 OPTIONS["overflow"]="--signed-overflow-check --no-assertions"
 OPTIONS["memsafety"]="--pointer-check --memory-leak-check --bounds-check --no-assertions"
+OPTIONS["memcleanup"]="--pointer-check --memory-leak-check --bounds-check --no-assertions"
 
 parse_property_file()
 {
@@ -22,6 +23,7 @@ if(/^CHECK\(init\((\S+)\(\)\),LTL\((\S+)\)\)$/) {
   print "PROP=\"unreach_call\"\n" if($2 =~ /^G!call\(__VERIFIER_error\(\)\)$/);
   print "PROP=\"unreach_call\"\n" if($2 =~ /^Gassert$/);
   print "PROP=\"memsafety\"\n" if($2 =~ /^Gvalid-(free|deref|memtrack)$/);
+  print "PROP=\"memcleanup\"\n" if($2 =~ /^Gvalid-(free|deref|memtrack)$/);
   print "PROP=\"overflow\"\n" if($2 =~ /^G!overflow$/);
   print "PROP=\"termination\"\n" if($2 =~ /^Fend$/);
 }'
@@ -31,10 +33,18 @@ parse_result()
 {
   if tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] .*__CPROVER_memory_leak == NULL|[[:space:]]*__CPROVER_memory_leak == NULL$)" ; then
-    echo 'FALSE(valid-memtrack)'
+    if [[ "$PROP" == "memcleanup" ]]; then
+      echo 'FALSE(valid-memcleanup)'
+    else
+      echo 'FALSE(valid-memtrack)'
+    fi
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] |[[:space:]]*)dynamically allocated memory never freed in " ; then
-    echo 'FALSE(valid-memtrack)'
+    if [[ "$PROP" == "memcleanup" ]]; then
+      echo 'FALSE(valid-memcleanup)'
+    else
+      echo 'FALSE(valid-memtrack)'
+    fi
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] |[[:space:]]*)dereference failure:" ; then
     echo 'FALSE(valid-deref)'
@@ -42,14 +52,25 @@ parse_result()
       grep -Eq "^(\[.*\] |[[:space:]]*)array.* upper bound in " ; then
     echo 'FALSE(valid-deref)'
   elif tail -n 50 $LOG.ok | \
+      grep -Eq "^[[:space:]]+mem(cpy|set|move) (source region readable|destination region writeable)" ; then
+    echo 'FALSE(valid-deref)'
+  elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] double free|[[:space:]]*double free$)" ; then
     echo 'FALSE(valid-free)'
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] free argument has offset zero|[[:space:]]* free argument has offset zero$)" ; then
-    echo 'FALSE(valid-free)'
+    if tail -n 50 $LOG.ok | grep -Eq "^[[:space:]]+[a-zA-Z0-9_]+=INVALID" ; then
+      echo 'FALSE(valid-deref)'
+    else
+      echo 'FALSE(valid-free)'
+    fi
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] |[[:space:]]*)free argument (is|must be) dynamic object" ; then
-    echo 'FALSE(valid-free)'
+    if tail -n 50 $LOG.ok | grep -Eq "^[[:space:]]+[a-zA-Z0-9_]+=INVALID" ; then
+      echo 'FALSE(valid-deref)'
+    else
+      echo 'FALSE(valid-free)'
+    fi
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] |[[:space:]]*)arithmetic overflow on signed" ; then
     echo 'FALSE(no-overflow)'
