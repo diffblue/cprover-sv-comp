@@ -59,10 +59,18 @@ parse_result()
     echo 'FALSE(valid-free)'
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] free argument has offset zero|[[:space:]]* free argument has offset zero$)" ; then
-    echo 'FALSE(valid-free)'
+    if tail -n 50 $LOG.ok | grep -Eq "^[[:space:]]+[a-zA-Z0-9_]+=INVALID" ; then
+      echo 'FALSE(valid-deref)'
+    else
+      echo 'FALSE(valid-free)'
+    fi
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] |[[:space:]]*)free argument (is|must be) dynamic object" ; then
-    echo 'FALSE(valid-free)'
+    if tail -n 50 $LOG.ok | grep -Eq "^[[:space:]]+[a-zA-Z0-9_]+=INVALID" ; then
+      echo 'FALSE(valid-deref)'
+    else
+      echo 'FALSE(valid-free)'
+    fi
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] |[[:space:]]*)arithmetic overflow on signed" ; then
     echo 'FALSE(no-overflow)'
