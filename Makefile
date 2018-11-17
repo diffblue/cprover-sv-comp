@@ -7,6 +7,8 @@ all: cbmc 2ls jbmc
 
 cbmc: cbmc.zip
 
+cbmc-path: cbmc-path.zip
+
 2ls: 2ls.zip
 
 jbmc: jbmc.zip
@@ -17,6 +19,19 @@ jbmc: jbmc.zip
 	echo "#!/bin/bash" > $@
 	cat $*.inc tool-wrapper.inc >> $@
 	chmod 755 $@
+
+cbmc-path.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC)/src/goto-cc/goto-cc
+	mkdir -p $(basename $@)
+	$(MAKE) cbmc-wrapper
+	mv cbmc-wrapper $(basename $@)/cbmc
+	sed -i 's/^.\/cbmc-binary --graphml-witness/.\/cbmc-binary --paths fifo --graphml-witness/' $(basename $@)/cbmc
+	cp -L $(CBMC)/LICENSE $(basename $@)/
+	cp -L $(CBMC)/src/cbmc/cbmc $(basename $@)/cbmc-binary
+	cp -L $(CBMC)/src/goto-cc/goto-cc $(basename $@)/
+	chmod a+rX $(basename $@)/*
+	zip -r $@ $(basename $@)
+	cd $(basename $@) && rm cbmc cbmc-binary goto-cc LICENSE
+	rmdir $(basename $@)
 
 cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC)/src/goto-cc/goto-cc
 	mkdir -p $(basename $@)
