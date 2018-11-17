@@ -13,7 +13,7 @@ run()
   jar -cfe $BM_DIR/task.jar Main -C $BM_DIR/classes .
   export TASK="$BM_DIR/task.jar"
 
-  export MORE_OPTIONS="--throw-runtime-exceptions --max-nondet-string-length 100 --classpath core-models.jar"
+  export MORE_OPTIONS="--java-threading --throw-runtime-exceptions --max-nondet-string-length 100 --classpath core-models.jar"
 
   if [ "$PROP" = "termination" ] ; then
     PROPERTY="$PROPERTY --no-assertions --no-self-loops-to-assumptions"
