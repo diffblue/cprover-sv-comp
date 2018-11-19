@@ -23,7 +23,7 @@ if(/^CHECK\(init\((\S+)\(\)\),LTL\((\S+)\)\)$/) {
   print "PROP=\"unreach_call\"\n" if($2 =~ /^G!call\(__VERIFIER_error\(\)\)$/);
   print "PROP=\"unreach_call\"\n" if($2 =~ /^Gassert$/);
   print "PROP=\"memsafety\"\n" if($2 =~ /^Gvalid-(free|deref|memtrack)$/);
-  print "PROP=\"memcleanup\"\n" if($2 =~ /^Gvalid-(free|deref|memtrack)$/);
+  print "PROP=\"memcleanup\"\n" if($2 =~ /^Gvalid-memcleanup$/);
   print "PROP=\"overflow\"\n" if($2 =~ /^G!overflow$/);
   print "PROP=\"termination\"\n" if($2 =~ /^Fend$/);
 }'
