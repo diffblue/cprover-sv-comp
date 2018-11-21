@@ -32,6 +32,9 @@ if(/^CHECK\(init\((\S+)\(\)\),LTL\((\S+)\)\)$/) {
 parse_result()
 {
   if tail -n 50 $LOG.ok | \
+      grep -Eq "Unmodelled library functions have been called" ; then
+    echo 'UNKNOWN'
+  elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] .*__CPROVER_memory_leak == NULL|[[:space:]]*__CPROVER_memory_leak == NULL$)" ; then
     if [[ "$PROP" == "memcleanup" ]]; then
       echo 'FALSE(valid-memcleanup)'
