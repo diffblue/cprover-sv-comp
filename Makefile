@@ -20,7 +20,7 @@ jbmc: jbmc.zip
 	cat $*.inc tool-wrapper.inc >> $@
 	chmod 755 $@
 
-cbmc-path.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC)/src/goto-cc/goto-cc
+cbmc-path.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC)/src/goto-cc/goto-cc README.cbmc-path.txt
 	mkdir -p $(basename $@)
 	$(MAKE) cbmc-wrapper
 	mv cbmc-wrapper $(basename $@)/cbmc
@@ -28,9 +28,10 @@ cbmc-path.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $
 	cp -L $(CBMC)/LICENSE $(basename $@)/
 	cp -L $(CBMC)/src/cbmc/cbmc $(basename $@)/cbmc-binary
 	cp -L $(CBMC)/src/goto-cc/goto-cc $(basename $@)/
+	cp -L README.cbmc-path.txt $(basename $@)/README.txt
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
-	cd $(basename $@) && rm cbmc cbmc-binary goto-cc LICENSE
+	cd $(basename $@) && rm cbmc cbmc-binary goto-cc LICENSE README.txt
 	rmdir $(basename $@)
 
 cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC)/src/goto-cc/goto-cc
