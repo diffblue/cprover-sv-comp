@@ -52,7 +52,7 @@ parse_result()
       grep -Eq "^(\[.*\] |[[:space:]]*)dereference failure:" ; then
     echo 'FALSE(valid-deref)'
   elif tail -n 50 $LOG.ok | \
-      grep -Eq "^(\[.*\] |[[:space:]]*)array.* upper bound in " ; then
+      grep -Eq "^(\[.*\] |[[:space:]]*)array.* (lower|upper) bound in " ; then
     echo 'FALSE(valid-deref)'
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^[[:space:]]+mem(cpy|set|move) (source region readable|destination region writeable)" ; then
