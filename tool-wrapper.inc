@@ -61,7 +61,7 @@ parse_result()
       grep -Eq "^(\[.*\] double free|[[:space:]]*double free$)" ; then
     echo 'FALSE(valid-free)'
   elif tail -n 50 $LOG.ok | \
-      grep -Eq "^(\[.*\] free called for stack-allocated object|[[:space:]]*called for stack-allocated object$)" ; then
+      grep -Eq "^(\[.*\] free called for stack-allocated object|[[:space:]]*free called for stack-allocated object$)" ; then
     echo 'FALSE(valid-free)'
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] free argument has offset zero|[[:space:]]* free argument has offset zero$)" ; then
