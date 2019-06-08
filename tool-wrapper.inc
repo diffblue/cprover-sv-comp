@@ -9,8 +9,8 @@ OPTIONS["label"]="--error-label"
 OPTIONS["unreach_call"]=""
 OPTIONS["termination"]=""
 OPTIONS["overflow"]="--signed-overflow-check --no-assertions"
-OPTIONS["memsafety"]="--pointer-check --memory-leak-check --bounds-check --no-assertions"
-OPTIONS["memcleanup"]="--pointer-check --memory-leak-check --bounds-check --no-assertions"
+OPTIONS["memsafety"]="--pointer-check --bounds-check --no-assertions"
+OPTIONS["memcleanup"]="--pointer-check --bounds-check --no-assertions"
 
 parse_property_file()
 {
