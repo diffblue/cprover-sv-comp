@@ -58,7 +58,7 @@ parse_result()
       grep -Eq "^[[:space:]]+mem(cpy|set|move) (source region readable|destination region writeable)" ; then
     echo 'FALSE(valid-deref)'
   elif tail -n 50 $LOG.ok | \
-      grep -Eq "^(\[.*\] double free|[[:space:]]*double free$)" ; then
+      grep -Eq "^(\[.*\] double free|[[:space:]]*double free$|[[:space:]]*free argument must be NULL or valid pointer$)" ; then
     echo 'FALSE(valid-free)'
   elif tail -n 50 $LOG.ok | \
       grep -Eq "^(\[.*\] free called for stack-allocated object|[[:space:]]*free called for stack-allocated object$)" ; then
