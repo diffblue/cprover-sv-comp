@@ -9,7 +9,7 @@ FIND_OPTIONS="-name '*.java'"
 run()
 {
   mkdir -p $BM_DIR/classes
-  javac -g -cp $BM_DIR/classes -d $BM_DIR/classes "${BM[@]}"
+  /usr/lib/jvm/java-8-openjdk-amd64/bin/javac -g -cp $BM_DIR/classes -d $BM_DIR/classes "${BM[@]}"
   rm $BM_DIR/classes/org/sosy_lab/sv_benchmarks/Verifier.class
   jar -cfe $BM_DIR/task.jar Main -C $BM_DIR/classes .
   export TASK="$BM_DIR/task.jar"
