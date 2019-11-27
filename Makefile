@@ -65,10 +65,11 @@ jbmc.zip: jbmc.inc tool-wrapper.inc $(JBMC)/LICENSE $(JBMC)/jbmc/src/jbmc/jbmc $
 	$(MAKE) jbmc-wrapper
 	mv jbmc-wrapper $(basename $@)/jbmc
 	./sv-comp-readme.sh $(basename $@) > $(basename $@)/README
-	cp -L $(JBMC)/LICENSE $(basename $@)/
+	cp -L $(JBMC)/LICENSE $(basename $@)/LICENSE-for-JBMC
+	cp -L $(JBMC)/jbmc/lib/java-models-library/OpenJDK\ \ GPLv2\ +\ Classpath\ Exception.txt $(basename $@)/LICENSE-for-core-models
 	cp -L $(JBMC)/jbmc/src/jbmc/jbmc $(basename $@)/jbmc-binary
 	cp -L $(JBMC)/jbmc/lib/java-models-library/target/core-models.jar $(basename $@)/
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
-	cd $(basename $@) && rm jbmc jbmc-binary core-models.jar LICENSE README
+	cd $(basename $@) && rm jbmc jbmc-binary core-models.jar LICENSE-for-core-models LICENSE-for-JBMC README
 	rmdir $(basename $@)
