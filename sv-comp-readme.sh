@@ -76,12 +76,20 @@ terminate for input programs that contain loops unless you specify an
 unwinding limit using --unwind N. For other flags, see `cbmc-binary -h`.
 
 EOF
-else
+elif [ x$TOOL != xjbmc ]
+then
   cat <<EOF
 
 To use the tool, run the tool passing a source file as argument. For C source
 code, and as only installation requirement, make sure a C compiler (such as GCC)
 is installed.
+EOF
+else
+  cat <<EOF
+
+To use the tool, run the tool passing a class or jar file as argument.
+Compile sources with Java 8. Using -g is recommended to obtain more
+readable counterexample traces.
 EOF
 fi
 
@@ -89,7 +97,7 @@ cat <<EOF
 
 For SV-COMP, use the wrapper script provided in this distribution, which takes
 the following options:
-
+  <path(s)> to sources
   --32 or --64: set the bit width
   --propertyfile <file>: read SV-COMP property specification from <file>
   --graphml-witness <file>: write SV-COMP witness to <file>
