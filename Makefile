@@ -1,7 +1,6 @@
 CBMC=../cbmc
 2LS=../2ls
 JBMC=../cbmc
-YEAR=2019
 
 all: cbmc 2ls jbmc
 
