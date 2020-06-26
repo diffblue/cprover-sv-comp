@@ -46,14 +46,14 @@ cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC
 	cd $(basename $@) && rm cbmc cbmc-binary goto-cc LICENSE README
 	rmdir $(basename $@)
 
-2ls.zip: 2ls.inc tool-wrapper.inc $(2LS)/LICENSE $(2LS)/src/2ls/2ls $(2LS)/cbmc/src/goto-cc/goto-cc sv-comp-readme.sh
+2ls.zip: 2ls.inc tool-wrapper.inc $(2LS)/LICENSE $(2LS)/src/2ls/2ls $(2LS)/lib/cbmc/src/goto-cc/goto-cc sv-comp-readme.sh
 	mkdir -p $(basename $@)
 	$(MAKE) 2ls-wrapper
 	mv 2ls-wrapper $(basename $@)/2ls
 	./sv-comp-readme.sh $(basename $@) > $(basename $@)/README
 	cp -L $(2LS)/LICENSE $(basename $@)/
 	cp -L $(2LS)/src/2ls/2ls $(basename $@)/2ls-binary
-	cp -L $(2LS)/cbmc/src/goto-cc/goto-cc $(basename $@)/
+	cp -L $(2LS)/lib/cbmc/src/goto-cc/goto-cc $(basename $@)/
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
 	cd $(basename $@) && rm 2ls 2ls-binary goto-cc LICENSE README
