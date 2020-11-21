@@ -20,7 +20,7 @@ parse_property_file()
 if(/^CHECK\(init\((\S+)\(\)\),LTL\((\S+)\)\)$/) {
   print "ENTRY=$1\n";
   print "PROP=\"label\"\nLABEL=\"$1\"\n" if($2 =~ /^G!label\((\S+)\)$/);
-  print "PROP=\"unreach_call\"\n" if($2 =~ /^G!call\(__VERIFIER_error\(\)\)$/);
+  print "PROP=\"unreach_call\"\n" if($2 =~ /^G!call\(reach_error\(\)\)$/);
   print "PROP=\"unreach_call\"\n" if($2 =~ /^Gassert$/);
   print "PROP=\"memsafety\"\n" if($2 =~ /^Gvalid-(free|deref|memtrack)$/);
   print "PROP=\"memcleanup\"\n" if($2 =~ /^Gvalid-memcleanup$/);
