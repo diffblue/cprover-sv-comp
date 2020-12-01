@@ -27,7 +27,9 @@ cbmc-path.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $
 	./sv-comp-readme.sh $(basename $@) > $(basename $@)/README
 	cp -L $(CBMC)/LICENSE $(basename $@)/
 	cp -L $(CBMC)/src/cbmc/cbmc $(basename $@)/cbmc-binary
+	strip $(basename $@)/cbmc-binary
 	cp -L $(CBMC)/src/goto-cc/goto-cc $(basename $@)/
+	strip $(basename $@)/goto-cc
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
 	cd $(basename $@) && rm cbmc cbmc-binary goto-cc LICENSE README
@@ -40,7 +42,9 @@ cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC
 	./sv-comp-readme.sh $(basename $@) > $(basename $@)/README
 	cp -L $(CBMC)/LICENSE $(basename $@)/
 	cp -L $(CBMC)/src/cbmc/cbmc $(basename $@)/cbmc-binary
+	strip $(basename $@)/cbmc-binary
 	cp -L $(CBMC)/src/goto-cc/goto-cc $(basename $@)/
+	strip $(basename $@)/goto-cc
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
 	cd $(basename $@) && rm cbmc cbmc-binary goto-cc LICENSE README
@@ -53,7 +57,9 @@ cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC
 	./sv-comp-readme.sh $(basename $@) > $(basename $@)/README
 	cp -L $(2LS)/LICENSE $(basename $@)/
 	cp -L $(2LS)/src/2ls/2ls $(basename $@)/2ls-binary
+	strip $(basename $@)/2ls-binary
 	cp -L $(2LS)/lib/cbmc/src/goto-cc/goto-cc $(basename $@)/
+	strip $(basename $@)/goto-cc
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
 	cd $(basename $@) && rm 2ls 2ls-binary goto-cc LICENSE README
@@ -67,6 +73,7 @@ jbmc.zip: jbmc.inc tool-wrapper.inc $(JBMC)/LICENSE $(JBMC)/jbmc/src/jbmc/jbmc $
 	cp -L $(JBMC)/LICENSE $(basename $@)/LICENSE-for-JBMC
 	cp -L $(JBMC)/jbmc/lib/java-models-library/OpenJDK\ \ GPLv2\ +\ Classpath\ Exception.txt $(basename $@)/LICENSE-for-core-models
 	cp -L $(JBMC)/jbmc/src/jbmc/jbmc $(basename $@)/jbmc-binary
+	strip $(basename $@)/jbmc-binary
 	cp -L $(JBMC)/jbmc/lib/java-models-library/target/core-models.jar $(basename $@)/
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
