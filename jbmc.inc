@@ -37,7 +37,7 @@ run()
   sed -i 's/new Random().nextFloat()/11.0f/g' $VERIFIER_FILE
   sed -i 's/new Random().nextDouble()/11.0/g' $VERIFIER_FILE
   sed -i 's/int size = random.nextInt();/int size = 1;/g' $VERIFIER_FILE
-  sed -i 's/return new String(bytes);/return "JBMC at SV-COMP 2020";/g' $VERIFIER_FILE
+  sed -i 's/return new String(bytes);/return "JBMC at SV-COMP 2022";/g' $VERIFIER_FILE
   # Compile
   $JVM_HOME/bin/javac -g -cp $BM_DIR/classes -d $BM_DIR/classes "${BM[@]}"
   # Check whether the file runs
@@ -70,7 +70,7 @@ run()
     jar -cfe $BM_DIR/task.jar Main -C $BM_DIR/classes .
     export TASK="$BM_DIR/task.jar"
 
-    export MORE_OPTIONS="--java-threading --throw-runtime-exceptions --max-nondet-string-length 100 --classpath core-models.jar"
+    export MORE_OPTIONS="--java-threading --throw-runtime-exceptions --max-nondet-string-length 100 --classpath core-models.jar:cprover-api.jar"
 
     if [ "$PROP" = "termination" ] ; then
       PROPERTY="$PROPERTY --no-assertions --no-self-loops-to-assumptions"
