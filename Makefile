@@ -1,6 +1,7 @@
 CBMC=../cbmc
 2LS=../2ls
 JBMC=../cbmc
+JAVA_CPROVER_API=../java-cprover-api
 
 all: cbmc 2ls jbmc
 
@@ -71,17 +72,19 @@ cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC
 	cd $(basename $@) && rm 2ls 2ls-binary goto-cc goto-instrument LICENSE README
 	rmdir $(basename $@)
 
-jbmc.zip: jbmc.inc tool-wrapper.inc $(JBMC)/LICENSE $(JBMC)/jbmc/src/jbmc/jbmc $(JBMC)/jbmc/lib/java-models-library/target/core-models.jar sv-comp-readme.sh
+jbmc.zip: jbmc.inc tool-wrapper.inc $(JBMC)/LICENSE $(JBMC)/jbmc/src/jbmc/jbmc $(JBMC)/jbmc/lib/java-models-library/target/core-models.jar $(JBMC)/jbmc/lib/java-models-library/target/cprover-api.jar sv-comp-readme.sh
 	mkdir -p $(basename $@)
 	$(MAKE) jbmc-wrapper
 	mv jbmc-wrapper $(basename $@)/jbmc
 	./sv-comp-readme.sh $(basename $@) > $(basename $@)/README
 	cp -L $(JBMC)/LICENSE $(basename $@)/LICENSE-for-JBMC
+	cp -L $(JAVA_CPROVER_API)/LICENSE $(basename $@)/LICENSE-for-java-cprover-api
 	cp -L $(JBMC)/jbmc/lib/java-models-library/OpenJDK\ \ GPLv2\ +\ Classpath\ Exception.txt $(basename $@)/LICENSE-for-core-models
 	cp -L $(JBMC)/jbmc/src/jbmc/jbmc $(basename $@)/jbmc-binary
 	strip $(basename $@)/jbmc-binary
 	cp -L $(JBMC)/jbmc/lib/java-models-library/target/core-models.jar $(basename $@)/
+	cp -L $(JBMC)/jbmc/lib/java-models-library/target/cprover-api.jar $(basename $@)/
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
-	cd $(basename $@) && rm jbmc jbmc-binary core-models.jar LICENSE-for-core-models LICENSE-for-JBMC README
+	cd $(basename $@) && rm jbmc jbmc-binary core-models.jar cprover-api.jar LICENSE-for-core-models LICENSE-for-JBMC LICENSE-for-java-cprover-api README
 	rmdir $(basename $@)
