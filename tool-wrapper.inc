@@ -100,7 +100,7 @@ process_graphml()
       <data key=\"producer\">$(echo $TOOL_NAME)<\/data>
       <data key=\"specification\">$(<$PROP_FILE)<\/data>
       <data key=\"programfile\">$(echo ${BM[0]} | sed 's8/8\\/8g')<\/data>
-      <data key=\"programhash\">$(sha1sum ${BM[0]} | awk '{print $1}')<\/data>
+      <data key=\"programhash\">$(sha256sum ${BM[0]} | awk '{print $1}')<\/data>
       <data key=\"architecture\">${BIT_WIDTH}bit<\/data>
       <data key=\"creationtime\">$(date -Iseconds)<\/data>\\Q/"
   fi
