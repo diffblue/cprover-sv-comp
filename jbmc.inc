@@ -46,7 +46,7 @@ run()
   EC=42
   # Filter out memouts and other errors
   if [ $ECR -eq 1 ] ; then
-    grep -E "java\.lang\.StackOverflowError|java\.lang\.OutOfMemoryError|Error: Could not find or load main class|Error: Main method not found in class" $LOG.latest > /dev/null
+    grep -E "java\.lang\.StackOverflowError|java\.lang\.OutOfMemoryError|Error: Could not find or load main class|Error: Main method not found in class|Exception in thread \"main\" java\..*Exception" $LOG.latest > /dev/null
     if [ $? -eq 0 ] ; then
       ECR=42
     fi
