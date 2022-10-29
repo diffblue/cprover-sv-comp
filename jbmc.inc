@@ -63,7 +63,7 @@ run()
   if [ $ECR -eq 0 ] ; then
     if [ $HAS_NONDET -eq 0 ] ; then
       EC=0
-      mv $LOG.latest $LOG.ok
+      cat $LOG.latest >> $LOG.ok
       echo "EC=$EC" >> $LOG.ok
     fi
   fi
@@ -97,16 +97,16 @@ if ! tail -n 10 $LOG.latest | grep -q "^VERIFICATION FAILED$" ; then ec=1 ; fi ;
 fi ; \
 \
 case $ec in \
-0) EC=0 ; mv $LOG.latest $LOG.ok ; echo "EC=$EC" >> $LOG.ok ; break ;; \
-10) EC=10 ; mv $LOG.latest $LOG.ok ; echo "EC=$EC" >> $LOG.ok ; break ;; \
-42) EC=42 ; mv $LOG.latest $LOG.ok ; echo "EC=$EC" >> $LOG.ok ;; \
-*) if [ $EC -ne 0 ] ; then EC=$ec ; mv $LOG.latest $LOG.ok ; fi ; echo "EC=$EC" >> $LOG.ok ; break ;; \
+0) EC=0 ; cat $LOG.latest >> $LOG.ok ; echo "EC=$EC" >> $LOG.ok ; break ;; \
+10) EC=10 ; cat $LOG.latest >> $LOG.ok ; echo "EC=$EC" >> $LOG.ok ; break ;; \
+42) EC=42 ; cat $LOG.latest >> $LOG.ok ; echo "EC=$EC" >> $LOG.ok ;; \
+*) if [ $EC -ne 0 ] ; then EC=$ec ; cat $LOG.latest >> $LOG.ok ; fi ; echo "EC=$EC" >> $LOG.ok ; break ;; \
 esac ; \
 \
 done \
 '
     if [ ! -s $LOG.ok ] ; then
-      mv $LOG.latest $LOG.ok ; echo "EC=42" >> $LOG.ok
+      cat $LOG.latest >> $LOG.ok ; echo "EC=42" >> $LOG.ok
     fi
   fi
   eval `tail -n 1 $LOG.ok`
