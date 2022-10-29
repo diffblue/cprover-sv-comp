@@ -71,6 +71,11 @@ run()
     rm $BM_DIR/classes/org/sosy_lab/sv_benchmarks/Verifier.class
     jar -cfe $BM_DIR/task.jar Main -C $BM_DIR/classes .
     export TASK="$BM_DIR/task.jar"
+    sha1sum $TASK >> $LOG.ok
+    sha1sum jbmc >> $LOG.ok
+    sha1sum jbmc-binary >> $LOG.ok
+    sha1sum core-models.jar >> $LOG.ok
+    sha1sum cprover-api.jar >> $LOG.ok
 
     export MORE_OPTIONS="--java-threading --throw-runtime-exceptions --max-nondet-string-length 100 --classpath core-models.jar:cprover-api.jar --uncaught-exception-check-for-assertions-only"
 
