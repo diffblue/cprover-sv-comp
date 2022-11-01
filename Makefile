@@ -19,7 +19,7 @@ jbmc: jbmc.zip
 	cat $*.inc tool-wrapper.inc >> $@
 	chmod 755 $@
 
-cbmc-path.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC)/src/goto-cc/goto-cc sv-comp-readme.sh
+cbmc-path.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC)/src/goto-cc/goto-cc $(CBMC)/src/goto-instrument/goto-instrument sv-comp-readme.sh
 	mkdir -p $(basename $@)
 	$(MAKE) cbmc-wrapper
 	mv cbmc-wrapper $(basename $@)/cbmc
@@ -30,12 +30,14 @@ cbmc-path.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $
 	strip $(basename $@)/cbmc-binary
 	cp -L $(CBMC)/src/goto-cc/goto-cc $(basename $@)/
 	strip $(basename $@)/goto-cc
+	cp -L $(CBMC)/src/goto-instrument/goto-instrument $(basename $@)/
+	strip $(basename $@)/goto-instrument
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
-	cd $(basename $@) && rm cbmc cbmc-binary goto-cc LICENSE README
+	cd $(basename $@) && rm cbmc cbmc-binary goto-cc goto-instrument LICENSE README
 	rmdir $(basename $@)
 
-cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC)/src/goto-cc/goto-cc sv-comp-readme.sh
+cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC)/src/goto-cc/goto-cc $(CBMC)/src/goto-instrument/goto-instrument sv-comp-readme.sh
 	mkdir -p $(basename $@)
 	$(MAKE) cbmc-wrapper
 	mv cbmc-wrapper $(basename $@)/cbmc
@@ -45,12 +47,14 @@ cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC
 	strip $(basename $@)/cbmc-binary
 	cp -L $(CBMC)/src/goto-cc/goto-cc $(basename $@)/
 	strip $(basename $@)/goto-cc
+	cp -L $(CBMC)/src/goto-instrument/goto-instrument $(basename $@)/
+	strip $(basename $@)/goto-instrument
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
-	cd $(basename $@) && rm cbmc cbmc-binary goto-cc LICENSE README
+	cd $(basename $@) && rm cbmc cbmc-binary goto-cc goto-instrument LICENSE README
 	rmdir $(basename $@)
 
-2ls.zip: 2ls.inc tool-wrapper.inc $(2LS)/LICENSE $(2LS)/src/2ls/2ls $(2LS)/lib/cbmc/src/goto-cc/goto-cc sv-comp-readme.sh
+2ls.zip: 2ls.inc tool-wrapper.inc $(2LS)/LICENSE $(2LS)/src/2ls/2ls $(2LS)/lib/cbmc/src/goto-cc/goto-cc $(2LS)/lib/cbmc/src/goto-instrument/goto-instrument sv-comp-readme.sh
 	mkdir -p $(basename $@)
 	$(MAKE) 2ls-wrapper
 	mv 2ls-wrapper $(basename $@)/2ls
@@ -60,9 +64,11 @@ cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC
 	strip $(basename $@)/2ls-binary
 	cp -L $(2LS)/lib/cbmc/src/goto-cc/goto-cc $(basename $@)/
 	strip $(basename $@)/goto-cc
+	cp -L $(2LS)/lib/cbmc/src/goto-instrument/goto-instrument $(basename $@)/
+	strip $(basename $@)/goto-instrument
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
-	cd $(basename $@) && rm 2ls 2ls-binary goto-cc LICENSE README
+	cd $(basename $@) && rm 2ls 2ls-binary goto-cc goto-instrument LICENSE README
 	rmdir $(basename $@)
 
 jbmc.zip: jbmc.inc tool-wrapper.inc $(JBMC)/LICENSE $(JBMC)/jbmc/src/jbmc/jbmc $(JBMC)/jbmc/lib/java-models-library/target/core-models.jar sv-comp-readme.sh

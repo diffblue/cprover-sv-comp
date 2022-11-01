@@ -15,6 +15,11 @@ run()
   gmon_suffix=$GMON_OUT_PREFIX
   export GMON_OUT_PREFIX="goto-cc_$gmon_suffix"
   ./goto-cc --object-bits $OBJ_BITS -m$BIT_WIDTH --function $ENTRY "${BM[@]}" -o $LOG.bin
+  if [ -n "$FAIL_FUNCTION" ]; then
+    ./goto-instrument $LOG.bin $LOG.bin --remove-function-body "$FAIL_FUNCTION" \
+                                        --generate-function-body "$FAIL_FUNCTION" \
+                                        --generate-function-body-options assert-false
+  fi
 
   export GMON_OUT_PREFIX="cbmc_$gmon_suffix"
 timeout 875 bash -c ' \
