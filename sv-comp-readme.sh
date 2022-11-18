@@ -36,13 +36,16 @@ then
 - goto-cc: this C compiler transforms input files into so-called
   "goto-binaries," which are encoded in CBMC's intermediate representation.
 
+- goto-instrument: performs required preliminary transformations on the
+  "goto-binary".
+
 - $TOOL-binary: this is the actual verification tool. It takes a goto-binary or
   source code as input and checks the properties specified by command-line
   flags.
 
-- $TOOL: this wrapper script invokes $TOOL-binary and goto-cc, parsing the
-  property file to pass the correct flags to $TOOL-binary and returning the
-  correct return codes for SV-COMP.
+- $TOOL: this wrapper script invokes $TOOL-binary, goto-cc and goto-instrument,
+  parsing the property file to pass the correct flags to $TOOL-binary and
+  returning the correct return codes for SV-COMP.
 EOF
 else
   cat <<EOF
