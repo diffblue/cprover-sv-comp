@@ -83,11 +83,11 @@ ulimit -v 15000000 ; \
 EC=42 ; \
 for c in 2 6 10 15 20 25 30 35 45 60 100 150 200 300 400 500 1025 2049 268435456 ; do \
 echo "Unwind: $c" > $LOG.latest ; \
-./jbmc-binary $MORE_OPTIONS --graphml-witness $LOG.witness --unwind $c --stop-on-fail --$BIT_WIDTH --object-bits $OBJ_BITS $PROPERTY --function $ENTRY -jar $TASK >> $LOG.latest 2>&1 ; \
+./jbmc-binary $MORE_OPTIONS --graphml-witness $LOG.witness --slice-formula --unwind $c --stop-on-fail --$BIT_WIDTH --object-bits $OBJ_BITS $PROPERTY --function $ENTRY -jar $TASK >> $LOG.latest 2>&1 ; \
 ec=$? ; \
 if [ $ec -eq 0 ] ; then \
 if ! tail -n 10 $LOG.latest | grep -q "^VERIFICATION SUCCESSFUL$" ; then ec=1 ; else \
-./jbmc-binary $MORE_OPTIONS --unwinding-assertions --unwind $c --stop-on-fail --$BIT_WIDTH --object-bits $OBJ_BITS $PROPERTY --function $ENTRY -jar $TASK > /dev/null 2>&1 || ec=42 ; \
+./jbmc-binary $MORE_OPTIONS --slice-formula --unwinding-assertions --unwind $c --stop-on-fail --$BIT_WIDTH --object-bits $OBJ_BITS $PROPERTY --function $ENTRY -jar $TASK > /dev/null 2>&1 || ec=42 ; \
 fi ; \
 fi ; \
 if [ $ec -eq 10 ] ; then \
