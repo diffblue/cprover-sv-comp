@@ -77,7 +77,7 @@ run()
     sha1sum core-models.jar >> $LOG.ok
     sha1sum cprover-api.jar >> $LOG.ok
 
-    export MORE_OPTIONS="--java-threading --throw-runtime-exceptions --max-nondet-string-length 100 --classpath core-models.jar:cprover-api.jar --uncaught-exception-check-for-assertions-only"
+    export MORE_OPTIONS="--java-threading --throw-runtime-exceptions --max-nondet-string-length 125 --classpath core-models.jar:cprover-api.jar --uncaught-exception-check-for-assertions-only"
 
     if [ "$PROP" = "termination" ] ; then
       PROPERTY="$PROPERTY --no-assertions --no-self-loops-to-assumptions"
