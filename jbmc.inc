@@ -54,14 +54,16 @@ run()
   # Assertion failure found
   if [ $ECR -eq 1 ] ; then
     EC=10
-    mv $LOG.latest $LOG.ok
+    # Provide minimal witness
+    echo -e '<?xml version="1.0" encoding="UTF-8" standalone="no"?>\n<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n  <key attr.name="originFileName" attr.type="string" for="edge" id="originfile">\n    <default>&lt;command-line&gt;</default>\n  </key>\n  <key attr.name="invariant" attr.type="string" for="node" id="invariant"/>\n  <key attr.name="invariant.scope" attr.type="string" for="node" id="invariant.scope"/>\n  <key attr.name="isViolationNode" attr.type="boolean" for="node" id="violation">\n    <default>false</default>\n  </key>\n  <key attr.name="isEntryNode" attr.type="boolean" for="node" id="entry">\n    <default>false</default>\n  </key>\n  <key attr.name="isSinkNode" attr.type="boolean" for="node" id="sink">\n    <default>false</default>\n  </key>\n  <key attr.name="enterLoopHead" attr.type="boolean" for="edge" id="enterLoopHead">\n    <default>false</default>\n  </key>\n  <key attr.name="cyclehead" attr.type="boolean" for="node" id="cyclehead">\n    <default>false</default>\n  </key>\n  <key attr.name="threadId" attr.type="int" for="edge" id="threadId">\n    <default>0</default>\n  </key>\n  <key attr.name="createThread" attr.type="int" for="edge" id="createThread">\n    <default>0</default>\n  </key>\n  <key attr.name="sourcecodeLanguage" attr.type="string" for="graph" id="sourcecodelang"/>\n  <key attr.name="programFile" attr.type="string" for="graph" id="programfile"/>\n  <key attr.name="programHash" attr.type="string" for="graph" id="programhash"/>\n  <key attr.name="specification" attr.type="string" for="graph" id="specification"/>\n  <key attr.name="architecture" attr.type="string" for="graph" id="architecture"/>\n  <key attr.name="producer" attr.type="string" for="graph" id="producer"/>\n  <key attr.name="creationtime" attr.type="string" for="graph" id="creationtime"/>\n  <key attr.name="startline" attr.type="int" for="edge" id="startline"/>\n  <key attr.name="control" attr.type="string" for="edge" id="control"/>\n  <key attr.name="assumption" attr.type="string" for="edge" id="assumption"/>\n  <key attr.name="assumption.resultfunction" attr.type="string" for="edge" id="assumption.resultfunction"/>\n  <key attr.name="assumption.scope" attr.type="string" for="edge" id="assumption.scope"/>\n  <key attr.name="enterFunction" attr.type="string" for="edge" id="enterFunction"/>\n  <key attr.name="returnFromFunction" attr.type="string" for="edge" id="returnFrom"/>\n  <key attr.name="witness-type" attr.type="string" for="graph" id="witness-type"/>\n  <graph edgedefault="directed">\n  </graph>\n</graphml>\n' > $LOG.witness
+    cat $LOG.latest >> $LOG.ok
     echo "EC=$EC" >> $LOG.ok
   fi
   # No assertion failure, but deterministic
   if [ $ECR -eq 0 ] ; then
     if [ $HAS_NONDET -eq 0 ] ; then
       EC=0
-      mv $LOG.latest $LOG.ok
+      cat $LOG.latest >> $LOG.ok
       echo "EC=$EC" >> $LOG.ok
     fi
   fi
@@ -69,8 +71,13 @@ run()
     rm $BM_DIR/classes/org/sosy_lab/sv_benchmarks/Verifier.class
     jar -cfe $BM_DIR/task.jar Main -C $BM_DIR/classes .
     export TASK="$BM_DIR/task.jar"
+    sha1sum $TASK >> $LOG.ok
+    sha1sum jbmc >> $LOG.ok
+    sha1sum jbmc-binary >> $LOG.ok
+    sha1sum core-models.jar >> $LOG.ok
+    sha1sum cprover-api.jar >> $LOG.ok
 
-    export MORE_OPTIONS="--java-threading --throw-runtime-exceptions --max-nondet-string-length 100 --classpath core-models.jar:cprover-api.jar --uncaught-exception-check-for-assertions-only"
+    export MORE_OPTIONS="--java-threading --throw-runtime-exceptions --max-nondet-string-length 125 --classpath core-models.jar:cprover-api.jar --uncaught-exception-check-for-assertions-only"
 
     if [ "$PROP" = "termination" ] ; then
       PROPERTY="$PROPERTY --no-assertions --no-self-loops-to-assumptions"
@@ -95,16 +102,16 @@ if ! tail -n 10 $LOG.latest | grep -q "^VERIFICATION FAILED$" ; then ec=1 ; fi ;
 fi ; \
 \
 case $ec in \
-0) EC=0 ; mv $LOG.latest $LOG.ok ; echo "EC=$EC" >> $LOG.ok ; break ;; \
-10) EC=10 ; mv $LOG.latest $LOG.ok ; echo "EC=$EC" >> $LOG.ok ; break ;; \
-42) EC=42 ; mv $LOG.latest $LOG.ok ; echo "EC=$EC" >> $LOG.ok ;; \
-*) if [ $EC -ne 0 ] ; then EC=$ec ; mv $LOG.latest $LOG.ok ; fi ; echo "EC=$EC" >> $LOG.ok ; break ;; \
+0) EC=0 ; cat $LOG.latest >> $LOG.ok ; echo "EC=$EC" >> $LOG.ok ; break ;; \
+10) EC=10 ; cat $LOG.latest >> $LOG.ok ; echo "EC=$EC" >> $LOG.ok ; break ;; \
+42) EC=42 ; cat $LOG.latest >> $LOG.ok ; echo "EC=$EC" >> $LOG.ok ;; \
+*) if [ $EC -ne 0 ] ; then EC=$ec ; cat $LOG.latest >> $LOG.ok ; fi ; echo "EC=$EC" >> $LOG.ok ; break ;; \
 esac ; \
 \
 done \
 '
     if [ ! -s $LOG.ok ] ; then
-      mv $LOG.latest $LOG.ok ; echo "EC=42" >> $LOG.ok
+      cat $LOG.latest >> $LOG.ok ; echo "EC=42" >> $LOG.ok
     fi
   fi
   eval `tail -n 1 $LOG.ok`
