@@ -11,6 +11,7 @@ OPTIONS["termination"]=""
 OPTIONS["overflow"]="--signed-overflow-check --no-assertions"
 OPTIONS["memsafety"]="--pointer-check --memory-leak-check --bounds-check --no-assertions"
 OPTIONS["memcleanup"]="--pointer-check --memory-leak-check --memory-cleanup-check --bounds-check --no-assertions"
+OPTIONS["runtime-exception"]="--uncaught-exception-check-only-for"
 
 parse_property_file()
 {
@@ -29,6 +30,8 @@ if(/^CHECK\(init\((\S+)\(\)\),LTL\((\S+)\)\)$/) {
   print "PROP=\"memcleanup\"\n" if($2 =~ /^Gvalid-memcleanup$/);
   print "PROP=\"overflow\"\n" if($2 =~ /^G!overflow$/);
   print "PROP=\"termination\"\n" if($2 =~ /^Fend$/);
+  # for Java only:
+  print "PROP=\"runtime-exception\"\nLABEL=\"$1\"\n" if($2 =~ /^G!uncaught\((\S+)\)$/);
 }'
 }
 
@@ -142,6 +145,8 @@ if [[ "$PROP" == "" ]]; then
   echo "Unrecognized property specification"
   exit 1
 elif [[ "$PROP" == "label" ]]; then
+  PROPERTY="${OPTIONS[$PROP]} $LABEL"
+elif [[ "$PROP" == "runtime-exception" ]]; then
   PROPERTY="${OPTIONS[$PROP]} $LABEL"
 else
   PROPERTY=${OPTIONS[$PROP]}
