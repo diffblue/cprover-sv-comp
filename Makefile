@@ -1,4 +1,4 @@
-CBMC=../cbmc
+CBMC=../cbmc-peter
 2LS=../2ls
 JBMC=../cbmc
 JAVA_CPROVER_API=../java-cprover-api
@@ -38,17 +38,17 @@ cbmc-path.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $
 	cd $(basename $@) && rm cbmc cbmc-binary goto-cc goto-instrument LICENSE README
 	rmdir $(basename $@)
 
-cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC)/src/goto-cc/goto-cc $(CBMC)/src/goto-instrument/goto-instrument sv-comp-readme.sh
+cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/cmake-build-debug/bin/cbmc $(CBMC)/cmake-build-debug/bin/goto-cc $(CBMC)/cmake-build-debug/bin/goto-instrument sv-comp-readme.sh
 	mkdir -p $(basename $@)
 	$(MAKE) cbmc-wrapper
 	mv cbmc-wrapper $(basename $@)/cbmc
 	./sv-comp-readme.sh $(basename $@) > $(basename $@)/README
 	cp -L $(CBMC)/LICENSE $(basename $@)/
-	cp -L $(CBMC)/src/cbmc/cbmc $(basename $@)/cbmc-binary
+	cp -L $(CBMC)/cmake-build-debug/bin/cbmc $(basename $@)/cbmc-binary
 	strip $(basename $@)/cbmc-binary
-	cp -L $(CBMC)/src/goto-cc/goto-cc $(basename $@)/
+	cp -L $(CBMC)/cmake-build-debug/bin/goto-cc $(basename $@)/
 	strip $(basename $@)/goto-cc
-	cp -L $(CBMC)/src/goto-instrument/goto-instrument $(basename $@)/
+	cp -L $(CBMC)/cmake-build-debug/bin/goto-instrument $(basename $@)/
 	strip $(basename $@)/goto-instrument
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
