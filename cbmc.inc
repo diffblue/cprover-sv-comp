@@ -29,11 +29,13 @@ ulimit -v 15000000 ; \
 EC=42 ; \
 for c in 2 6 12 17 21 40 200 400 1025 2049 268435456 ; do \
 echo "Unwind: $c" > $LOG.latest ; \
-./cbmc-binary --no-unwinding-assertions --no-standard-checks --lazy-c-seq-rounds 3 --graphml-witness $LOG.witness --slice-formula --unwind $c --stop-on-fail --object-bits $OBJ_BITS $PROPERTY $LOG.bin >> $LOG.latest 2>&1 ; \
+for d in 1 2 6 12 17 21 40 200 400 1025 2049 268435456 ; do \
+echo "Rounds: $d" > $LOG.latest ; \
+./cbmc-binary --no-unwinding-assertions --no-standard-checks --lazy-c-seq-rounds $d --graphml-witness $LOG.witness --slice-formula --unwind $c --stop-on-fail --object-bits $OBJ_BITS $PROPERTY $LOG.bin >> $LOG.latest 2>&1 ; \
 ec=$? ; \
 if [ $ec -eq 0 ] ; then \
 if ! tail -n 10 $LOG.latest | grep -q "^VERIFICATION SUCCESSFUL$" ; then ec=1 ; else \
-./cbmc-binary --lazy-c-seq-rounds 3 --no-standard-checks --slice-formula --unwind $c --stop-on-fail --object-bits $OBJ_BITS $PROPERTY $LOG.bin > /dev/null 2>&1 || ec=42 ; \
+./cbmc-binary --lazy-c-seq-rounds $d --no-standard-checks --slice-formula --unwind $c --stop-on-fail --object-bits $OBJ_BITS $PROPERTY $LOG.bin > /dev/null 2>&1 || ec=42 ; \
 fi ; \
 fi ; \
 if [ $ec -eq 10 ] ; then \
@@ -47,6 +49,7 @@ case $ec in \
 *) if [ $EC -ne 0 ] ; then EC=$ec ; mv $LOG.latest $LOG.ok ; fi ; echo "EC=$EC" >> $LOG.ok ; break ;; \
 esac ; \
 \
+done \
 done \
 '
   if [ ! -s $LOG.ok ] ; then
