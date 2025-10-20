@@ -1,4 +1,5 @@
 CBMC=../cbmc
+CMAKE_BUILD_DIR=build
 2LS=../2ls
 JBMC=../cbmc
 JAVA_CPROVER_API=../java-cprover-api
@@ -20,35 +21,35 @@ jbmc: jbmc.zip
 	cat $*.inc tool-wrapper.inc >> $@
 	chmod 755 $@
 
-cbmc-path.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC)/src/goto-cc/goto-cc $(CBMC)/src/goto-instrument/goto-instrument sv-comp-readme.sh
+cbmc-path.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/$(CMAKE_BUILD_DIR)/bin/cbmc $(CBMC)/$(CMAKE_BUILD_DIR)/bin/goto-cc $(CBMC)/$(CMAKE_BUILD_DIR)/bin/goto-instrument sv-comp-readme.sh
 	mkdir -p $(basename $@)
 	$(MAKE) cbmc-wrapper
 	mv cbmc-wrapper $(basename $@)/cbmc
 	sed -i 's/^.\/cbmc-binary --graphml-witness/.\/cbmc-binary --paths fifo --graphml-witness/' $(basename $@)/cbmc
 	./sv-comp-readme.sh $(basename $@) > $(basename $@)/README
 	cp -L $(CBMC)/LICENSE $(basename $@)/
-	cp -L $(CBMC)/src/cbmc/cbmc $(basename $@)/cbmc-binary
+	cp -L $(CBMC)/$(CMAKE_BUILD_DIR)/bin/cbmc $(basename $@)/cbmc-binary
 	strip $(basename $@)/cbmc-binary
-	cp -L $(CBMC)/src/goto-cc/goto-cc $(basename $@)/
+	cp -L $(CBMC)/$(CMAKE_BUILD_DIR)/bin/goto-cc $(basename $@)/
 	strip $(basename $@)/goto-cc
-	cp -L $(CBMC)/src/goto-instrument/goto-instrument $(basename $@)/
+	cp -L $(CBMC)/$(CMAKE_BUILD_DIR)/bin/goto-instrument $(basename $@)/
 	strip $(basename $@)/goto-instrument
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
 	cd $(basename $@) && rm cbmc cbmc-binary goto-cc goto-instrument LICENSE README
 	rmdir $(basename $@)
 
-cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC)/src/goto-cc/goto-cc $(CBMC)/src/goto-instrument/goto-instrument sv-comp-readme.sh
+cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/$(CMAKE_BUILD_DIR)/bin/cbmc $(CBMC)/$(CMAKE_BUILD_DIR)/bin/goto-cc $(CBMC)/$(CMAKE_BUILD_DIR)/bin/goto-instrument sv-comp-readme.sh
 	mkdir -p $(basename $@)
 	$(MAKE) cbmc-wrapper
 	mv cbmc-wrapper $(basename $@)/cbmc
 	./sv-comp-readme.sh $(basename $@) > $(basename $@)/README
 	cp -L $(CBMC)/LICENSE $(basename $@)/
-	cp -L $(CBMC)/src/cbmc/cbmc $(basename $@)/cbmc-binary
+	cp -L $(CBMC)/$(CMAKE_BUILD_DIR)/bin/cbmc $(basename $@)/cbmc-binary
 	strip $(basename $@)/cbmc-binary
-	cp -L $(CBMC)/src/goto-cc/goto-cc $(basename $@)/
+	cp -L $(CBMC)/$(CMAKE_BUILD_DIR)/bin/goto-cc $(basename $@)/
 	strip $(basename $@)/goto-cc
-	cp -L $(CBMC)/src/goto-instrument/goto-instrument $(basename $@)/
+	cp -L $(CBMC)/$(CMAKE_BUILD_DIR)/bin/goto-instrument $(basename $@)/
 	strip $(basename $@)/goto-instrument
 	chmod a+rX $(basename $@)/*
 	zip -r $@ $(basename $@)
@@ -72,7 +73,7 @@ cbmc.zip: cbmc.inc tool-wrapper.inc $(CBMC)/LICENSE $(CBMC)/src/cbmc/cbmc $(CBMC
 	cd $(basename $@) && rm 2ls 2ls-binary goto-cc goto-instrument LICENSE README
 	rmdir $(basename $@)
 
-jbmc.zip: jbmc.inc tool-wrapper.inc $(JBMC)/LICENSE $(JBMC)/jbmc/src/jbmc/jbmc $(JBMC)/jbmc/lib/java-models-library/target/core-models.jar $(JBMC)/jbmc/lib/java-models-library/target/cprover-api.jar sv-comp-readme.sh
+jbmc.zip: jbmc.inc tool-wrapper.inc $(JBMC)/LICENSE $(JBMC)/$(CMAKE_BUILD_DIR)/bin/jbmc $(JBMC)/jbmc/lib/java-models-library/target/core-models.jar $(JBMC)/jbmc/lib/java-models-library/target/cprover-api.jar sv-comp-readme.sh
 	mkdir -p $(basename $@)
 	$(MAKE) jbmc-wrapper
 	mv jbmc-wrapper $(basename $@)/jbmc
@@ -80,7 +81,7 @@ jbmc.zip: jbmc.inc tool-wrapper.inc $(JBMC)/LICENSE $(JBMC)/jbmc/src/jbmc/jbmc $
 	cp -L $(JBMC)/LICENSE $(basename $@)/LICENSE-for-JBMC
 	cp -L $(JAVA_CPROVER_API)/LICENSE $(basename $@)/LICENSE-for-java-cprover-api
 	cp -L $(JBMC)/jbmc/lib/java-models-library/OpenJDK\ \ GPLv2\ +\ Classpath\ Exception.txt $(basename $@)/LICENSE-for-core-models
-	cp -L $(JBMC)/jbmc/src/jbmc/jbmc $(basename $@)/jbmc-binary
+	cp -L $(JBMC)/$(CMAKE_BUILD_DIR)/bin/jbmc $(basename $@)/jbmc-binary
 	strip $(basename $@)/jbmc-binary
 	cp -L $(JBMC)/jbmc/lib/java-models-library/target/core-models.jar $(basename $@)/
 	cp -L $(JBMC)/jbmc/lib/java-models-library/target/cprover-api.jar $(basename $@)/

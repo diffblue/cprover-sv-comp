@@ -1,5 +1,59 @@
 # CPROVER SV-COMP Wrappers and Configuration
 
+#### Prerequisites
+
+### CBMC
+
+By default, this should work:
+```
+git clone https://github.com/diffblue/cbmc
+cd cbmc
+cmake -S . -Bbuild
+cmake --build build -- -j8
+cd ..
+https://github.com/diffblue/cprover-sv-comp
+cd cprover-sv-comp
+```
+
+You can use the following variables in `Makefile` to customize:
+- `CBMC`: relative location of CBMC clone; by default `../cbmc`
+- `CMAKE_BUILD_DIR`: `cmake` build directory; by default `build`
+
+### JBMC
+
+By default, this should work:
+```
+git clone https://github.com/diffblue/java-cprover-api
+git clone https://gitlab.com/sosy-lab/benchmarking/sv-benchmarks
+git clone https://github.com/diffblue/cbmc
+cd cbmc
+cmake -S . -Bbuild
+cmake --build build -- -j8
+cd ..
+https://github.com/diffblue/cprover-sv-comp
+cd cprover-sv-comp
+```
+
+You can use the following variables in `Makefile` to customize:
+- `JBMC`: relative location of CBMC clone; by default `../cbmc`
+- `CMAKE_BUILD_DIR`: `cmake` build directory; by default `build`
+- `JAVA_CPROVER_API`: relative location of java-cprover-api clone; by default `../java-cprover-api`
+
+### 2LS
+
+By default, this should work:
+```
+git clone https://github.com/diffblue/2ls
+cd 2ls
+./build.sh
+cd ..
+https://github.com/diffblue/cprover-sv-comp
+cd cprover-sv-comp
+```
+
+You can use the following variables in `Makefile` to customize:
+- `2LS`: relative location of 2LS clone; by default `../2ls`
+
 #### Build package
 
 `make`
