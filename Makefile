@@ -17,7 +17,7 @@ jbmc: jbmc.zip
 
 .PHONY: cbmc 2ls jbmc test
 
-test: regression/test_validate_inputs.py regression/test_parse_property_file.py
+test: regression/test_validate_inputs.py regression/test_parse_property_file.py regression/test_parse_result.py
 	python3 -m unittest $^
 
 cbmc-path.zip: cbmc_wrapper.py tool_wrapper.py $(CBMC)/LICENSE $(CBMC)/$(CMAKE_BUILD_DIR)/bin/cbmc $(CBMC)/$(CMAKE_BUILD_DIR)/bin/goto-cc $(CBMC)/$(CMAKE_BUILD_DIR)/bin/goto-instrument sv-comp-readme.sh
