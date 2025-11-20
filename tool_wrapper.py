@@ -137,37 +137,37 @@ class ToolWrapper(ABC):
         
         if re.search(r"Unmodelled library functions have been called", tail_content):
             return "UNKNOWN"
-        elif re.search(r"(\[.*\] .*__CPROVER_memory_leak == NULL|[[:space:]]*__CPROVER_memory_leak == NULL$)", tail_content):
+        elif re.search(r"(\[.*\] .*__CPROVER_memory_leak == NULL|\s*__CPROVER_memory_leak == NULL$)", tail_content, re.MULTILINE):
             if self.prop == "memcleanup":
                 return "FALSE(valid-memcleanup)"
             else:
                 return "FALSE(valid-memtrack)"
-        elif re.search(r"(\[.*\] |[[:space:]]*)dynamically allocated memory never freed in", tail_content):
+        elif re.search(r"(\[.*\] |\s*)dynamically allocated memory never freed in", tail_content):
             if self.prop == "memcleanup":
                 return "FALSE(valid-memcleanup)"
             else:
                 return "FALSE(valid-memtrack)"
-        elif re.search(r"(\[.*\] |[[:space:]]*)dereference failure:", tail_content):
+        elif re.search(r"(\[.*\] |\s*)dereference failure:", tail_content):
             return "FALSE(valid-deref)"
-        elif re.search(r"(\[.*\] |[[:space:]]*)array.* (lower|upper) bound in", tail_content):
+        elif re.search(r"(\[.*\] |\s*)array.* (lower|upper) bound in", tail_content):
             return "FALSE(valid-deref)"
-        elif re.search(r"[[:space:]]+mem(cpy|set|move) (source region readable|destination region writeable)", tail_content):
+        elif re.search(r"\s+mem(cpy|set|move) (source region readable|destination region writeable)", tail_content):
             return "FALSE(valid-deref)"
-        elif re.search(r"(\[.*\] double free|[[:space:]]*double free$|[[:space:]]*free argument must be NULL or valid pointer$)", tail_content):
+        elif re.search(r"(\[.*\] double free|\s*double free$|\s*free argument must be NULL or valid pointer$)", tail_content, re.MULTILINE):
             return "FALSE(valid-free)"
-        elif re.search(r"(\[.*\] free called for stack-allocated object|[[:space:]]*free called for stack-allocated object$)", tail_content):
+        elif re.search(r"(\[.*\] free called for stack-allocated object|\s*free called for stack-allocated object$)", tail_content, re.MULTILINE):
             return "FALSE(valid-free)"
-        elif re.search(r"(\[.*\] free argument has offset zero|[[:space:]]* free argument has offset zero$)", tail_content):
-            if re.search(r"[[:space:]]+[a-zA-Z0-9_]+=INVALID-", tail_content):
+        elif re.search(r"(\[.*\] free argument has offset zero|\s*free argument has offset zero$)", tail_content, re.MULTILINE):
+            if re.search(r"\s+[a-zA-Z0-9_]+=INVALID-", tail_content):
                 return "FALSE(valid-deref)"
             else:
                 return "FALSE(valid-free)"
-        elif re.search(r"(\[.*\] |[[:space:]]*)free argument (is|must be) dynamic object", tail_content):
-            if re.search(r"[[:space:]]+[a-zA-Z0-9_]+=INVALID-", tail_content):
+        elif re.search(r"(\[.*\] |\s*)free argument (is|must be) dynamic object", tail_content):
+            if re.search(r"\s+[a-zA-Z0-9_]+=INVALID-", tail_content):
                 return "FALSE(valid-deref)"
             else:
                 return "FALSE(valid-free)"
-        elif re.search(r"(\[.*\] |[[:space:]]*)arithmetic overflow on signed", tail_content):
+        elif re.search(r"(\[.*\] |\s*)arithmetic overflow on signed", tail_content):
             return "FALSE(no-overflow)"
         elif self.prop == "termination":
             return "FALSE(termination)"
