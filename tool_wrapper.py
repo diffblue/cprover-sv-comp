@@ -249,13 +249,6 @@ class ToolWrapper(ABC):
             self.validate_inputs()
             self.parse_property_file()
             self.setup_environment()           
-            # Export environment variables
-            os.environ['ENTRY'] = self.entry
-            os.environ['PROPERTY'] = self.property_options
-            os.environ['BIT_WIDTH'] = self.bit_width
-            os.environ['BM'] = ' '.join(self.benchmarks)
-            os.environ['PROP'] = self.prop
-            os.environ['OBJ_BITS'] = self.obj_bits
             
             # Run the tool
             ec = self.run()
