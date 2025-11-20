@@ -20,6 +20,7 @@ run()
     if [ $? -eq 0 ] ; then
       VERIFIER_FILE="$BM_DIR/src/org/sosy_lab/sv_benchmarks/Verifier.java"
       cp "${BM[$f]}" $VERIFIER_FILE
+      cp $(dirname ${BM[$f]})/ObjectFactory.java $BM_DIR/src/org/sosy_lab/sv_benchmarks/ObjectFactory.java
       BM[$f]="$VERIFIER_FILE"
     else
       grep "Verifier.nondet" "${BM[$f]}" > /dev/null
