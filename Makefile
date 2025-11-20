@@ -91,6 +91,7 @@ jbmc.zip: jbmc.inc tool-wrapper.inc $(JBMC)/LICENSE $(JBMC)/$(CMAKE_BUILD_DIR)/b
 	mkdir -p $(basename $@)/smoketest/common/org/sosy_lab/sv_benchmarks
 	cp -L $(SV_BENCHMARKS)/java/properties/valid-assert.prp $(basename $@)/smoketest/valid-assert.prp
 	cp -L $(SV_BENCHMARKS)/java/common/org/sosy_lab/sv_benchmarks/Verifier.java $(basename $@)/smoketest/common/org/sosy_lab/sv_benchmarks/
+	cp -L $(SV_BENCHMARKS)/java/common/org/sosy_lab/sv_benchmarks/ObjectFactory.java $(basename $@)/smoketest/common/org/sosy_lab/sv_benchmarks/
 	cp -L $(SV_BENCHMARKS)/java/jbmc-regression/if_expr1/Main.java $(basename $@)/smoketest/true1/
 	cp -L $(SV_BENCHMARKS)/java/jbmc-regression/assert2/Main.java $(basename $@)/smoketest/false1/
 	echo '#!/usr/bin/env bash' > $(basename $@)/smoketest.sh
