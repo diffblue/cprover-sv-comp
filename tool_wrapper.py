@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import os
 import sys
 import re
@@ -251,8 +249,7 @@ class ToolWrapper(ABC):
         try:
             self.validate_inputs()
             self.parse_property_file()
-            self.setup_environment()
-            
+            self.setup_environment()           
             # Export environment variables
             os.environ['ENTRY'] = self.entry
             os.environ['PROPERTY'] = self.property_options

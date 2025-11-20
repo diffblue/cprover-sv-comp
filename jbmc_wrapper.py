@@ -6,7 +6,7 @@ import subprocess
 import time
 import re
 import shutil
-from common import ToolWrapper
+from tool_wrapper import ToolWrapper
 
 class JBMCWrapper(ToolWrapper):
     """JBMC-specific wrapper implementation"""
@@ -351,4 +351,4 @@ class JBMCWrapper(ToolWrapper):
 if __name__ == "__main__":
     wrapper = JBMCWrapper()
     wrapper.parse_arguments(sys.argv[1:])
-    wrapper.execute()
+    wrapper.execute() 
