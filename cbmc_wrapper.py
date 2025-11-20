@@ -4,7 +4,7 @@ import os
 import sys
 import subprocess
 import time
-from common import ToolWrapper
+from tool_wrapper import ToolWrapper
 
 class CBMCWrapper(ToolWrapper):
     """CBMC-specific wrapper implementation"""
@@ -121,32 +121,21 @@ class CBMCWrapper(ToolWrapper):
                 # Update log files based on result
                 if ec == 0:
                     os.rename(f"{self.log_file}.latest", f"{self.log_file}.ok")
-                    with open(f"{self.log_file}.ok", 'a') as log:
-                        log.write(f"\nEC={ec}\n")
                     break
                 elif ec == 10:
                     os.rename(f"{self.log_file}.latest", f"{self.log_file}.ok")
-                    with open(f"{self.log_file}.ok", 'a') as log:
-                        log.write(f"\nEC={ec}\n")
                     break
                 elif ec == 42:
                     os.rename(f"{self.log_file}.latest", f"{self.log_file}.ok")
-                    with open(f"{self.log_file}.ok", 'a') as log:
-                        log.write(f"\nEC={ec}\n")
                 else:
-                    if self.ec != 0:
-                        self.ec = ec
+                    if ec != 0:
                         os.rename(f"{self.log_file}.latest", f"{self.log_file}.ok")
-                    with open(f"{self.log_file}.ok", 'a') as log:
-                        log.write(f"\nEC={ec}\n")
                     break
                     
             except subprocess.TimeoutExpired:
                 ec = 42
                 if os.path.exists(f"{self.log_file}.latest"):
                     os.rename(f"{self.log_file}.latest", f"{self.log_file}.ok")
-                with open(f"{self.log_file}.ok", 'a') as log:
-                    log.write(f"\nEC={ec}\n")
                 break
             except Exception:
                 ec = 42
@@ -156,10 +145,9 @@ class CBMCWrapper(ToolWrapper):
         if not os.path.exists(f"{self.log_file}.ok"):
             if os.path.exists(f"{self.log_file}.latest"):
                 os.rename(f"{self.log_file}.latest", f"{self.log_file}.ok")
-            with open(f"{self.log_file}.ok", 'a') as log:
-                log.write(f"\nEC=42\n")
+            ec = 42
                 
-        self.ec = ec
+        return ec
 
 
 if __name__ == "__main__":

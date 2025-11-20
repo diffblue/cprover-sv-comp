@@ -5,7 +5,7 @@ import sys
 import subprocess
 import time
 import signal
-from common import ToolWrapper
+from tool_wrapper import ToolWrapper
 
 class TwoLSWrapper(ToolWrapper):
     """2LS-specific wrapper implementation"""
@@ -43,7 +43,7 @@ class TwoLSWrapper(ToolWrapper):
         
         if self.prop == "termination":
             # Run termination and non-termination analysis in parallel
-            self._run_termination_analysis()
+            return self._run_termination_analysis()
         else:
             # Run standard analysis
             property_options = self.property_options + " --heap --arrays --values-refine --k-induction --competition-mode"
@@ -56,8 +56,9 @@ class TwoLSWrapper(ToolWrapper):
             
             with open(f"{self.log_file}.ok", 'w') as log:
                 result = subprocess.run(cmd, stdout=log, stderr=subprocess.STDOUT)
-                self.ec = result.returncode
-                log.write(f"\nEC={self.ec}\n")
+                ec = result.returncode
+                
+            return ec
                 
     def _run_termination_analysis(self):
         """Run termination and non-termination analysis in parallel"""
@@ -130,11 +131,7 @@ class TwoLSWrapper(ToolWrapper):
         if os.path.exists(other_log):
             os.remove(other_log)
             
-        # Append exit code
-        with open(f"{self.log_file}.ok", 'a') as log:
-            log.write(f"\nEC={ec}\n")
-            
-        self.ec = ec
+        return ec
 
 
 if __name__ == "__main__":

@@ -40,7 +40,6 @@ class ToolWrapper(ABC):
         self.property_options = ""
         self.log_file = None
         self.bm_dir = None
-        self.ec = None
         
     def parse_arguments(self, args):
         """Parse command line arguments"""
@@ -259,7 +258,7 @@ class ToolWrapper(ABC):
             os.environ['OBJ_BITS'] = self.obj_bits
             
             # Run the tool
-            self.run()
+            ec = self.run()
             
             # Process results
             log_ok_path = f"{self.log_file}.ok"
@@ -270,25 +269,18 @@ class ToolWrapper(ABC):
                 log_content = f.read()
                 
             print(log_content)
-            
-            # Extract exit code from log
-            ec_match = re.search(r'EC=(\d+)', log_content)
-            if ec_match:
-                self.ec = int(ec_match.group(1))
-            else:
-                self.ec = 42
                 
             # Generate result
-            if self.ec == 0:
+            if ec == 0:
                 if self.witness_file:
-                    witness_content = self.process_graphml(self.ec)
+                    witness_content = self.process_graphml(ec)
                     if witness_content:
                         with open(self.witness_file, 'w') as f:
                             f.write(witness_content)
                 print("TRUE")
-            elif self.ec == 10:
+            elif ec == 10:
                 if self.witness_file:
-                    witness_content = self.process_graphml(self.ec)
+                    witness_content = self.process_graphml(ec)
                     if witness_content:
                         with open(self.witness_file, 'w') as f:
                             f.write(witness_content)
@@ -297,7 +289,7 @@ class ToolWrapper(ABC):
             else:
                 print("UNKNOWN")
                 
-            sys.exit(self.ec)
+            sys.exit(ec)
             
         finally:
             self.cleanup()

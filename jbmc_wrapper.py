@@ -74,7 +74,7 @@ class JBMCWrapper(ToolWrapper):
             # Run JBMC
             ec = self._run_jbmc(classes_dir)
             
-        self.ec = ec
+        return ec
         
     def _patch_verifier_file(self, verifier_file):
         """Patch the Verifier.java file"""
@@ -145,15 +145,11 @@ class JBMCWrapper(ToolWrapper):
             # Create minimal witness
             self._create_minimal_witness()
             shutil.copy(f"{self.log_file}.latest", f"{self.log_file}.ok")
-            with open(f"{self.log_file}.ok", 'a') as log:
-                log.write(f"\nEC={ec}\n")
         elif ecr == 0:
             # No assertion failure, but might be deterministic
             if not self._has_nondet():
                 ec = 0
                 shutil.copy(f"{self.log_file}.latest", f"{self.log_file}.ok")
-                with open(f"{self.log_file}.ok", 'a') as log:
-                    log.write(f"\nEC={ec}\n")
                     
         return ec
         
@@ -318,7 +314,6 @@ class JBMCWrapper(ToolWrapper):
                 with open(f"{self.log_file}.ok", 'a') as log:
                     with open(f"{self.log_file}.latest", 'r') as latest:
                         log.write(latest.read())
-                    log.write(f"\nEC={ec}\n")
                     
                 if ec in [0, 10]:
                     break
@@ -331,7 +326,6 @@ class JBMCWrapper(ToolWrapper):
                     if os.path.exists(f"{self.log_file}.latest"):
                         with open(f"{self.log_file}.latest", 'r') as latest:
                             log.write(latest.read())
-                    log.write(f"\nEC={ec}\n")
                 break
             except Exception:
                 ec = 42
@@ -340,10 +334,10 @@ class JBMCWrapper(ToolWrapper):
         # Final update if needed
         if not os.path.exists(f"{self.log_file}.ok"):
             if os.path.exists(f"{self.log_file}.latest"):
-                with open(f"{self.log_file}.ok", 'a') as log:
+                with open(f"{self.log_file}.ok", 'w') as log:
                     with open(f"{self.log_file}.latest", 'r') as latest:
                         log.write(latest.read())
-                    log.write(f"\nEC=42\n")
+            ec = 42
                     
         return ec
 
