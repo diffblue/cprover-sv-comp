@@ -16,14 +16,52 @@ class JBMCWrapper(ToolWrapper):
         self.tool_binary = "./jbmc-binary"
         self.tool_name = "JBMC"
         self.find_options = "-name '*.java'"
-        self.jvm_home = "/usr/lib/jvm/java-8-openjdk-amd64"
-        
+        self.jvm_home = None
+
     def print_version(self):
         """Print JBMC version"""
         subprocess.run([self.tool_binary, "--version"])
-        
+
+    def _discover_jvm_home(self):
+        """Discover a Java 21 JDK in the usual Ubuntu locations (as installed
+        by the openjdk-21-jdk-headless package), falling back to JAVA_HOME if
+        none is found. Called from run() rather than __init__ so that --version
+        queries, handled in parse_arguments() before run() is ever called,
+        don't trigger this search."""
+        candidates = [
+            "/usr/lib/jvm/java-21-openjdk-amd64",
+            "/usr/lib/jvm/java-21-openjdk-arm64",
+            "/usr/lib/jvm/java-21-openjdk",
+        ]
+        for candidate in candidates:
+            print(f"Searching for Java 21 JDK: {candidate}", file=sys.stderr)
+            if os.path.isfile(os.path.join(candidate, "bin", "javac")):
+                self.jvm_home = candidate
+                print("javac version:", file=sys.stderr)
+                subprocess.run([self._javac_path(), "-version"])
+                return
+
+        print("Java 21 JDK not found in the usual Ubuntu JDK locations.", file=sys.stderr)
+        java_home = os.environ.get("JAVA_HOME", "")
+        if java_home:
+            print(f"Falling back to JAVA_HOME ({java_home}).", file=sys.stderr)
+            self.jvm_home = java_home
+        else:
+            print("JAVA_HOME is not set either. Falling back to javac/java on PATH.", file=sys.stderr)
+            self.jvm_home = ""
+        print("javac version:", file=sys.stderr)
+        subprocess.run([self._javac_path(), "-version"])
+
+    def _javac_path(self):
+        return os.path.join(self.jvm_home, "bin", "javac") if self.jvm_home else "javac"
+
+    def _java_path(self):
+        return os.path.join(self.jvm_home, "bin", "java") if self.jvm_home else "java"
+
     def run(self):
         """Run JBMC"""
+        self._discover_jvm_home()
+
         # Create directories
         classes_dir = os.path.join(self.bm_dir, "classes")
         src_dir = os.path.join(self.bm_dir, "src", "org", "sosy_lab", "sv_benchmarks")
@@ -59,7 +97,7 @@ class JBMCWrapper(ToolWrapper):
         
         # Compile Java files
         javac_cmd = [
-            os.path.join(self.jvm_home, "bin", "javac"),
+            self._javac_path(),
             "-g",
             "-cp", classes_dir,
             "-d", classes_dir
@@ -98,7 +136,7 @@ class JBMCWrapper(ToolWrapper):
             
     def _try_java_execution(self, classes_dir, java_options):
         """Try running the Java program directly"""
-        java_cmd = [os.path.join(self.jvm_home, "bin", "java")]
+        java_cmd = [self._java_path()]
         if java_options:
             java_cmd.append(java_options)
         java_cmd.extend(["-cp", classes_dir, "Main"])
