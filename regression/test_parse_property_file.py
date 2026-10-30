@@ -76,6 +76,14 @@ class TestParsePropertyFile(unittest.TestCase):
         self.assertIn('ENTRY=main', output)
         self.assertIn('PROP="memsafety"', output)
 
+    def test_memsafety_multiple_properties(self):
+        content = ("CHECK( init(main()), LTL(G valid-free) )\n"
+                   "CHECK( init(main()), LTL(G valid-deref) )\n"
+                   "CHECK( init(main()), LTL(G valid-memtrack) )\n")
+        output = self.run_parse_property_file(content)
+        self.assertIn('ENTRY=main', output)
+        self.assertIn('PROP="memsafety"', output)
+
     def test_memsafety_valid_deref(self):
         content = "CHECK( init(main()), LTL(G valid-deref) )"
         output = self.run_parse_property_file(content)

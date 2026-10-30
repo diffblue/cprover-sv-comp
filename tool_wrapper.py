@@ -86,6 +86,11 @@ class ToolWrapper(ABC):
         with open(self.prop_file, 'r') as f:
             content = f.read()
             
+        # A property file may contain several properties, one per line, as for
+        # memory safety; they all map to the same tool options.
+        lines = [line for line in content.splitlines() if line.strip()]
+        content = lines[0] if lines else ""
+
         # Remove whitespace
         content = re.sub(r'\s+', '', content)
         
