@@ -46,6 +46,7 @@ class JBMCWrapper(ToolWrapper):
         self.tool_binary = "./jbmc-binary"
         self.tool_name = "JBMC"
         self.find_options = "-name '*.java'"
+        self.language = "Java"
         self.jvm_home = None
 
     def print_version(self):
@@ -282,10 +283,9 @@ class JBMCWrapper(ToolWrapper):
         if self.witness_format == "yaml":
             with open(f"{self.log_file}.latest", 'r') as log:
                 waypoints = self._violation_waypoints(log.read())
-            version = subprocess.run(
-                [self.tool_binary, "--version"], capture_output=True, text=True).stdout.strip()
             with open(f"{self.log_file}.witness", 'w') as f:
-                f.write(make_yaml_witness("JBMC", version, "Java", waypoints))
+                f.write(make_yaml_witness(
+                    self.tool_name, self.tool_version(), self.language, waypoints))
             return
 
         witness_content = '''<?xml version="1.0" encoding="UTF-8" standalone="no"?>

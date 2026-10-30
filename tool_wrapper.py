@@ -170,14 +170,17 @@ def complete_yaml_witness(witness, input_files, specification, fail_function):
     return header + separator + content_head + "".join(completed)
 
 
-def make_yaml_witness(producer, version, language, waypoints):
-    """Return a violation witness in the format produced by CBMC and JBMC.
+def make_yaml_witness(producer, version, language, waypoints,
+                      entry_type="violation_sequence", data_model=None):
+    """Return a witness in the format produced by CBMC and JBMC, i.e.,
+    without the input files and the specification.
 
     Each waypoint is a dict with the keys type, file_name, line and, for
-    function_return waypoints, value."""
+    function_return waypoints, value. A correctness witness (entry_type
+    invariant_set) without waypoints contains no invariants."""
     formats = {"C": "acsl_expression", "Java": "ext_java_expression"}
     out = [
-        '- entry_type: "violation_sequence"',
+        f"- entry_type: {yaml_string(entry_type)}",
         "  metadata:",
         f"    format_version: {yaml_string('2.4' if language == 'Java' else '2.0')}",
         f"    uuid: {yaml_string(str(uuid.uuid4()))}",
@@ -187,6 +190,10 @@ def make_yaml_witness(producer, version, language, waypoints):
         f"      name: {yaml_string(producer)}",
         f"      version: {yaml_string(version)}",
         "    task:",
+    ]
+    if data_model:
+        out.append(f"      data_model: {yaml_string(data_model)}")
+    out += [
         f"      language: {yaml_string(language)}",
         "  content:" + ("" if waypoints else " []"),
     ]
@@ -225,6 +232,7 @@ class ToolWrapper(ABC):
         self.witness_file = ""
         self.witness_format = None
         self.input_files = []
+        self.language = "C"
         self.prop = None
         self.entry = None
         self.label = None
@@ -418,15 +426,26 @@ class ToolWrapper(ABC):
         option = "--witness" if self.witness_format == "yaml" else "--graphml-witness"
         return [option, f"{self.log_file}.witness"]
 
+    def tool_version(self):
+        """Return the version of the tool"""
+        return subprocess.run(
+            [self.tool_binary, "--version"], capture_output=True, text=True).stdout.strip()
+
     def process_yaml(self, exit_code, result):
         """Complete the YAML witness written by the tool"""
-        witness_path = f"{self.log_file}.witness"
-        # correctness witnesses are not supported yet
-        if exit_code != 10 or not os.path.exists(witness_path):
-            return None
-
-        with open(witness_path, 'r') as f:
-            witness_content = f.read()
+        if exit_code == 0:
+            # a correctness witness without invariants
+            witness_content = make_yaml_witness(
+                self.tool_name, self.tool_version(), self.language, [],
+                entry_type="invariant_set",
+                data_model=None if self.language == "Java" else
+                ("ILP32" if self.bit_width == "32" else "LP64"))
+        else:
+            witness_path = f"{self.log_file}.witness"
+            if not os.path.exists(witness_path):
+                return None
+            with open(witness_path, 'r') as f:
+                witness_content = f.read()
         with open(self.prop_file, 'r') as f:
             specification = violated_specification(f.read(), result)
 

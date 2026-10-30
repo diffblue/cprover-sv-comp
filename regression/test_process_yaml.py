@@ -12,6 +12,7 @@ from tool_wrapper import (
     complete_yaml_witness, find_input_file, make_yaml_witness,
     nondet_call_columns, violated_specification)
 from jbmc_wrapper import JBMCWrapper, NONDET_LOG_PREFIX
+from cbmc_wrapper import CBMCWrapper
 
 
 C_WITNESS = '''- entry_type: "violation_sequence"
@@ -155,6 +156,26 @@ class TestProcessYAML(unittest.TestCase):
         self.assertIn('          value: "\\\\result == 11L"\n'
                       '          format: "ext_java_expression"\n', witness)
         self.assertIn('        type: "target"\n', witness)
+
+    def test_correctness_witness(self):
+        os.chdir(self.temp_dir)
+        prop_file = os.path.join(self.temp_dir, "unreach-call.prp")
+        with open(prop_file, 'w') as f:
+            f.write("CHECK( init(main()), LTL(G ! call(reach_error())) )\n")
+        wrapper = CBMCWrapper()
+        wrapper.tool_binary = "true"
+        wrapper.prop_file = prop_file
+        wrapper.input_files = ["main.c"]
+        wrapper.bit_width = "32"
+        witness = wrapper.process_yaml(0, None)
+        self.assertTrue(witness.startswith('- entry_type: "invariant_set"\n'))
+        self.assertIn('    format_version: "2.0"\n', witness)
+        self.assertIn('      - "main.c"\n', witness)
+        self.assertIn(
+            '      specification: "CHECK( init(main()), LTL(G ! call(reach_error())) )"\n'
+            '      data_model: "ILP32"\n'
+            '      language: "C"\n'
+            '  content: []\n', witness)
 
     def test_instrument_verifier(self):
         verifier = ("package org.sosy_lab.sv_benchmarks;\n"
