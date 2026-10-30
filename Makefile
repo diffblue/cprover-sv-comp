@@ -103,8 +103,8 @@ jbmc.zip: jbmc_wrapper.py tool_wrapper.py $(JBMC)/LICENSE $(JBMC)/$(CMAKE_BUILD_
 	cp -L $(SV_BENCHMARKS)/java/jbmc-regression/assert2/Main.java $(basename $@)/smoketest/false1/
 	echo '#!/usr/bin/env bash' > $(basename $@)/smoketest.sh
 	echo 'set -eux pipefail' >> $(basename $@)/smoketest.sh
-	echo './jbmc --graphml-witness witness.graphml --propertyfile smoketest/valid-assert.prp smoketest/common smoketest/true1 | tee smoketest/true1/result.log; cat smoketest/true1/result.log | grep TRUE; echo $?' >> $(basename $@)/smoketest.sh
-	echo './jbmc --graphml-witness witness.graphml --propertyfile smoketest/valid-assert.prp smoketest/common smoketest/false1 | tee smoketest/false1/result.log; cat smoketest/false1/result.log | grep FALSE; echo $?' >> $(basename $@)/smoketest.sh
+	echo './jbmc --witness witness.yml --propertyfile smoketest/valid-assert.prp smoketest/common smoketest/true1 | tee smoketest/true1/result.log; cat smoketest/true1/result.log | grep TRUE; echo $?' >> $(basename $@)/smoketest.sh
+	echo './jbmc --witness witness.yml --propertyfile smoketest/valid-assert.prp smoketest/common smoketest/false1 | tee smoketest/false1/result.log; cat smoketest/false1/result.log | grep FALSE; echo $?' >> $(basename $@)/smoketest.sh
 	chmod a+rx $(basename $@)/*
 	zip -r $@ $(basename $@)
 	cd $(basename $@) && rm jbmc tool_wrapper.py jbmc-binary core-models.jar cprover-api.jar LICENSE-for-core-models LICENSE-for-JBMC LICENSE-for-java-cprover-api README smoketest.sh && rm -Rf smoketest
