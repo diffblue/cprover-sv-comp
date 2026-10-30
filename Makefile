@@ -5,6 +5,9 @@ JBMC=../cbmc
 JAVA_CPROVER_API=../java-cprover-api
 SV_BENCHMARKS=../sv-benchmarks
 
+# the first 10 characters of the commit hash of this repository
+WRAPPER_VERSION=$(shell git rev-parse HEAD | cut -c1-10)
+
 all: cbmc 2ls jbmc
 
 cbmc: cbmc.zip
@@ -29,7 +32,7 @@ test: $(REGRESSION_TESTS)
 cbmc-path.zip: cbmc_wrapper.py tool_wrapper.py $(CBMC)/LICENSE $(CBMC)/$(CMAKE_BUILD_DIR)/bin/cbmc $(CBMC)/$(CMAKE_BUILD_DIR)/bin/goto-cc $(CBMC)/$(CMAKE_BUILD_DIR)/bin/goto-instrument sv-comp-readme.sh
 	mkdir -p $(basename $@)
 	cp cbmc_wrapper.py $(basename $@)/cbmc
-	cp tool_wrapper.py $(basename $@)/
+	sed 's/@WRAPPER_VERSION@/$(WRAPPER_VERSION)/' tool_wrapper.py > $(basename $@)/tool_wrapper.py
 	sed -i 's/^.\/cbmc-binary --graphml-witness/.\/cbmc-binary --paths fifo --graphml-witness/' $(basename $@)/cbmc
 	./sv-comp-readme.sh $(basename $@) > $(basename $@)/README
 	cp -L $(CBMC)/LICENSE $(basename $@)/
@@ -47,7 +50,7 @@ cbmc-path.zip: cbmc_wrapper.py tool_wrapper.py $(CBMC)/LICENSE $(CBMC)/$(CMAKE_B
 cbmc.zip: cbmc_wrapper.py tool_wrapper.py $(CBMC)/LICENSE $(CBMC)/$(CMAKE_BUILD_DIR)/bin/cbmc $(CBMC)/$(CMAKE_BUILD_DIR)/bin/goto-cc $(CBMC)/$(CMAKE_BUILD_DIR)/bin/goto-instrument sv-comp-readme.sh
 	mkdir -p $(basename $@)
 	cp cbmc_wrapper.py $(basename $@)/cbmc
-	cp tool_wrapper.py $(basename $@)/
+	sed 's/@WRAPPER_VERSION@/$(WRAPPER_VERSION)/' tool_wrapper.py > $(basename $@)/tool_wrapper.py
 	./sv-comp-readme.sh $(basename $@) > $(basename $@)/README
 	cp -L $(CBMC)/LICENSE $(basename $@)/
 	cp -L $(CBMC)/$(CMAKE_BUILD_DIR)/bin/cbmc $(basename $@)/cbmc-binary
@@ -64,7 +67,7 @@ cbmc.zip: cbmc_wrapper.py tool_wrapper.py $(CBMC)/LICENSE $(CBMC)/$(CMAKE_BUILD_
 2ls.zip: 2ls_wrapper.py tool_wrapper.py $(2LS)/LICENSE $(2LS)/src/2ls/2ls $(2LS)/lib/cbmc/src/goto-cc/goto-cc $(2LS)/lib/cbmc/src/goto-instrument/goto-instrument sv-comp-readme.sh
 	mkdir -p $(basename $@)
 	cp 2ls_wrapper.py $(basename $@)/2ls
-	cp tool_wrapper.py $(basename $@)/
+	sed 's/@WRAPPER_VERSION@/$(WRAPPER_VERSION)/' tool_wrapper.py > $(basename $@)/tool_wrapper.py
 	./sv-comp-readme.sh $(basename $@) > $(basename $@)/README
 	cp -L $(2LS)/LICENSE $(basename $@)/
 	cp -L $(2LS)/src/2ls/2ls $(basename $@)/2ls-binary
@@ -81,7 +84,7 @@ cbmc.zip: cbmc_wrapper.py tool_wrapper.py $(CBMC)/LICENSE $(CBMC)/$(CMAKE_BUILD_
 jbmc.zip: jbmc_wrapper.py tool_wrapper.py $(JBMC)/LICENSE $(JBMC)/$(CMAKE_BUILD_DIR)/bin/jbmc $(JBMC)/jbmc/lib/java-models-library/target/core-models.jar $(JBMC)/jbmc/lib/java-models-library/target/cprover-api.jar sv-comp-readme.sh
 	mkdir -p $(basename $@)
 	cp jbmc_wrapper.py $(basename $@)/jbmc
-	cp tool_wrapper.py $(basename $@)/
+	sed 's/@WRAPPER_VERSION@/$(WRAPPER_VERSION)/' tool_wrapper.py > $(basename $@)/tool_wrapper.py
 	./sv-comp-readme.sh $(basename $@) > $(basename $@)/README
 	cp -L $(JBMC)/LICENSE $(basename $@)/LICENSE-for-JBMC
 	cp -L $(JAVA_CPROVER_API)/LICENSE $(basename $@)/LICENSE-for-java-cprover-api

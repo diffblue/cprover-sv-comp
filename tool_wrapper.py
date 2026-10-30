@@ -12,6 +12,10 @@ import glob
 import signal
 import shutil
 
+# The first 10 characters of the commit hash of the cprover-sv-comp
+# repository, filled in when packaging the wrapper
+WRAPPER_VERSION = "@WRAPPER_VERSION@"
+
 # Property options mapping
 PROPERTY_OPTIONS = {
     "label": "--error-label",
@@ -430,6 +434,15 @@ class ToolWrapper(ABC):
         """Return the version of the tool"""
         return subprocess.run(
             [self.tool_binary, "--version"], capture_output=True, text=True).stdout.strip()
+
+    def tool_and_wrapper_version(self):
+        """Return the version of the tool and of this wrapper, e.g.,
+        6.11.0 (cbmc-6.11.0-47-g41dc048b07 + cprover-sv-comp-435e2a0dac)"""
+        version = self.tool_version()
+        wrapper = f"cprover-sv-comp-{WRAPPER_VERSION}"
+        if version.endswith(")"):
+            return f"{version[:-1]} + {wrapper})"
+        return f"{version} + {wrapper}"
 
     def process_yaml(self, exit_code, result):
         """Complete the YAML witness written by the tool"""

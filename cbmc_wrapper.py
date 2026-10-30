@@ -16,8 +16,8 @@ class CBMCWrapper(ToolWrapper):
         self.find_options = ""
         
     def print_version(self):
-        """Print CBMC version"""
-        subprocess.run([self.tool_binary, "--version"])
+        """Print CBMC version and the version of this wrapper"""
+        print(self.tool_and_wrapper_version())
         
     def run(self):
         """Run CBMC with unwinding"""

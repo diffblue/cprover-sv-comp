@@ -50,8 +50,8 @@ class JBMCWrapper(ToolWrapper):
         self.jvm_home = None
 
     def print_version(self):
-        """Print JBMC version"""
-        subprocess.run([self.tool_binary, "--version"])
+        """Print JBMC version and the version of this wrapper"""
+        print(self.tool_and_wrapper_version())
 
     def _discover_jvm_home(self):
         """Discover a Java 21 JDK in the usual Ubuntu locations (as installed

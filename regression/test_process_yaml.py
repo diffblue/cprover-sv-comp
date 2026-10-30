@@ -6,6 +6,7 @@ import os
 import tempfile
 import hashlib
 import shutil
+from unittest.mock import patch
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from tool_wrapper import (
@@ -176,6 +177,17 @@ class TestProcessYAML(unittest.TestCase):
             '      data_model: "ILP32"\n'
             '      language: "C"\n'
             '  content: []\n', witness)
+
+    def test_tool_and_wrapper_version(self):
+        wrapper = CBMCWrapper()
+        with patch.object(wrapper, "tool_version",
+                          return_value="6.11.0 (cbmc-6.11.0-47-g41dc048b07)"):
+            self.assertRegex(
+                wrapper.tool_and_wrapper_version(),
+                r"^6\.11\.0 \(cbmc-6\.11\.0-47-g41dc048b07 \+ cprover-sv-comp-\S+\)$")
+        with patch.object(wrapper, "tool_version", return_value="0.1"):
+            self.assertRegex(
+                wrapper.tool_and_wrapper_version(), r"^0\.1 \+ cprover-sv-comp-\S+$")
 
     def test_instrument_verifier(self):
         verifier = ("package org.sosy_lab.sv_benchmarks;\n"
