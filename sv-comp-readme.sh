@@ -104,4 +104,5 @@ the following options:
   --32 or --64: set the bit width
   --propertyfile <file>: read SV-COMP property specification from <file>
   --graphml-witness <file>: write SV-COMP witness to <file>
+  --witness <file>: write SV-COMP witness in witness format 2.x to <file>
 EOF

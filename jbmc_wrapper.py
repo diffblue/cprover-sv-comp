@@ -6,7 +6,37 @@ import subprocess
 import time
 import re
 import shutil
-from tool_wrapper import ToolWrapper
+from tool_wrapper import ToolWrapper, make_yaml_witness, find_input_file
+
+# Prefix of the lines that the instrumented Verifier prints for each value it
+# returns, see _instrument_verifier
+NONDET_LOG_PREFIX = "CPROVER-WITNESS-NONDET"
+
+# Reports the call site and the returned value of the Verifier.nondet*
+# methods; the call site is the fourth frame: __cproverWitness,
+# __cproverWitnessValue, Verifier.nondet*, caller
+VERIFIER_WITNESS_METHODS = """
+  private static void __cproverWitness(String value) {
+    StackTraceElement caller = new Throwable().getStackTrace()[3];
+    String className = caller.getClassName();
+    if (className.startsWith("org.sosy_lab.sv_benchmarks.Verifier")) return;
+    int dot = className.lastIndexOf('.');
+    String path = (dot < 0 ? "" : className.substring(0, dot).replace('.', '/') + "/")
+        + caller.getFileName();
+    System.err.println("%s\\t" + path + "\\t" + caller.getLineNumber() + "\\t" + value);
+  }
+  private static void __cproverWitnessValue(boolean v) { __cproverWitness(String.valueOf(v)); }
+  private static void __cproverWitnessValue(char v) { __cproverWitness(String.valueOf((int) v)); }
+  private static void __cproverWitnessValue(int v) { __cproverWitness(String.valueOf(v)); }
+  private static void __cproverWitnessValue(long v) { __cproverWitness(v + "L"); }
+  private static void __cproverWitnessValue(float v) {
+    if (!Float.isNaN(v) && !Float.isInfinite(v)) __cproverWitness(v + "f");
+  }
+  private static void __cproverWitnessValue(double v) {
+    if (!Double.isNaN(v) && !Double.isInfinite(v)) __cproverWitness(String.valueOf(v));
+  }
+  private static void __cproverWitnessValue(Object v) { }
+""" % NONDET_LOG_PREFIX
 
 class JBMCWrapper(ToolWrapper):
     """JBMC-specific wrapper implementation"""
@@ -130,10 +160,57 @@ class JBMCWrapper(ToolWrapper):
         content = content.replace('new Random().nextDouble()', '11.0')
         content = content.replace('int size = random.nextInt();', 'int size = 1;')
         content = content.replace('return new String(bytes);', 'return "JBMC at SV-COMP 2025";')
-        
+
+        if self.witness_format == "yaml":
+            content = self._instrument_verifier(content)
+
         with open(verifier_file, 'w') as f:
             f.write(content)
             
+    @staticmethod
+    def _instrument_verifier(content):
+        """Make the Verifier.nondet* methods report their call site and the
+        value they return, to generate a witness if the program fails when
+        executed. The line numbers of the file are preserved."""
+        content = re.sub(
+            r"public static (\w+) (nondet\w+)\(\) \{",
+            r"public static \1 \2() { \1 __result = __cprover_\2(); "
+            r"__cproverWitnessValue(__result); return __result; } "
+            r"private static \1 __cprover_\2() {",
+            content)
+        end_of_class = content.rstrip().rfind("}")
+        return content[:end_of_class] + VERIFIER_WITNESS_METHODS + content[end_of_class:]
+
+    def _violation_waypoints(self, log_content):
+        """Return the waypoints for a failed execution of the program, given
+        its output: the values returned by the instrumented Verifier and the
+        location of the uncaught exception in the program"""
+        waypoints = []
+        for match in re.finditer(
+                r"^" + NONDET_LOG_PREFIX + r"\t(.*)\t(\d+)\t(.*)$", log_content, re.MULTILINE):
+            waypoints.append({
+                "type": "function_return",
+                "file_name": match.group(1),
+                "line": int(match.group(2)),
+                "value": match.group(3),
+            })
+
+        # the innermost frame of the exception's stack trace in the program
+        exception = log_content.find('Exception in thread "main"')
+        if exception >= 0:
+            for match in re.finditer(
+                    r"^\s+at (?:[\w$]+/)?([\w$.]+)\.[\w$<>]+\(([\w$]+\.java):(\d+)\)$",
+                    log_content[exception:], re.MULTILINE):
+                class_name, file_name = match.group(1), match.group(2)
+                package = class_name.rpartition(".")[0]
+                path = (package.replace(".", "/") + "/" if package else "") + file_name
+                if (not class_name.startswith("org.sosy_lab.sv_benchmarks.Verifier") and
+                        find_input_file(path, self.input_files)):
+                    waypoints.append(
+                        {"type": "target", "file_name": path, "line": int(match.group(3))})
+                    break
+        return waypoints
+
     def _try_java_execution(self, classes_dir, java_options):
         """Try running the Java program directly"""
         java_cmd = [self._java_path()]
@@ -201,7 +278,16 @@ class JBMCWrapper(ToolWrapper):
         return False
         
     def _create_minimal_witness(self):
-        """Create a minimal GraphML witness"""
+        """Create a witness for a failed execution of the program"""
+        if self.witness_format == "yaml":
+            with open(f"{self.log_file}.latest", 'r') as log:
+                waypoints = self._violation_waypoints(log.read())
+            version = subprocess.run(
+                [self.tool_binary, "--version"], capture_output=True, text=True).stdout.strip()
+            with open(f"{self.log_file}.witness", 'w') as f:
+                f.write(make_yaml_witness("JBMC", version, "Java", waypoints))
+            return
+
         witness_content = '''<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <key attr.name="originFileName" attr.type="string" for="edge" id="originfile">
@@ -300,7 +386,7 @@ class JBMCWrapper(ToolWrapper):
             jbmc_cmd = [
                 self.tool_binary,
                 *more_options.split(),
-                "--graphml-witness", f"{self.log_file}.witness",
+                *self.witness_options(),
                 "--no-unwinding-assertions",
                 "--unwind", str(unwind),
                 "--stop-on-fail",

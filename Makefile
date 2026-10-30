@@ -20,7 +20,8 @@ jbmc: jbmc.zip
 REGRESSION_TESTS = regression/test_validate_inputs.py \
                    regression/test_parse_property_file.py \
                    regression/test_parse_result.py \
-                   regression/test_process_graphml.py
+                   regression/test_process_graphml.py \
+                   regression/test_process_yaml.py
 
 test: $(REGRESSION_TESTS)
 	python3 -m unittest $^

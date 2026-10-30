@@ -67,7 +67,7 @@ class CBMCWrapper(ToolWrapper):
                 self.tool_binary,
                 "--no-unwinding-assertions",
                 "--no-standard-checks",
-                "--graphml-witness", f"{self.log_file}.witness",
+                *self.witness_options(),
                 "--slice-formula",
                 "--unwind", str(unwind),
                 "--stop-on-fail",

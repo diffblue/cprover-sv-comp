@@ -1,10 +1,12 @@
 import os
 import sys
 import re
+import json
+import uuid
 import tempfile
 import subprocess
 import hashlib
-from datetime import datetime
+from datetime import datetime, timezone
 from abc import ABC, abstractmethod
 import glob
 import signal
@@ -21,6 +23,194 @@ PROPERTY_OPTIONS = {
     "runtime-exception": "--uncaught-exception-check-only-for"
 }
 
+# Calls of functions returning nondeterministic values, whose results are given
+# by function_return waypoints in YAML witnesses
+NONDET_CALL_PATTERNS = {
+    "C": re.compile(r"\b__VERIFIER_nondet_\w+\s*\("),
+    "Java": re.compile(r"\bnondet\w*\s*\("),
+}
+
+
+def yaml_string(s):
+    """Return s as a double-quoted YAML scalar (JSON strings are valid YAML)"""
+    return json.dumps(s)
+
+
+def find_input_file(file_name, input_files):
+    """Return the input file that a location's file name refers to.
+
+    The tools give the file names as passed to the front end, e.g. relative to
+    the working directory for C or relative to the class path for Java, so the
+    trailing path components are matched."""
+    name = os.path.normpath(file_name)
+    for input_file in input_files:
+        if os.path.normpath(input_file) == name:
+            return input_file
+    name_parts = name.split(os.sep)
+    for input_file in input_files:
+        input_parts = os.path.normpath(input_file).split(os.sep)
+        if input_parts[-len(name_parts):] == name_parts:
+            return input_file
+    return None
+
+
+def nondet_call_columns(line, language):
+    """Return the columns (starting at 1) that function_return waypoints for
+    the nondet calls on the given source line point to: the closing
+    parenthesis of the call for C, the opening parenthesis for Java"""
+    columns = []
+    for match in NONDET_CALL_PATTERNS[language].finditer(line):
+        open_paren = match.end() - 1
+        if language == "Java":
+            columns.append(open_paren + 1)
+            continue
+        depth = 0
+        for pos in range(open_paren, len(line)):
+            if line[pos] == "(":
+                depth += 1
+            elif line[pos] == ")":
+                depth -= 1
+                if depth == 0:
+                    columns.append(pos + 1)
+                    break
+    return columns
+
+
+def call_start_column(line, function):
+    """Return the column (starting at 1) of the first call of function on the
+    given source line, or None"""
+    match = re.search(r"\b" + re.escape(function) + r"\s*\(", line)
+    return match.start() + 1 if match else None
+
+
+def violated_specification(prop_file_content, result):
+    """Return the property of the property file that the result says is
+    violated, e.g. "CHECK( init(main()), LTL(G valid-deref) )" for
+    "FALSE(valid-deref)" and a memory-safety property file"""
+    checks = [l.strip() for l in prop_file_content.splitlines() if l.strip()]
+    match = re.match(r"^FALSE\((\S+)\)$", result or "")
+    if match and len(checks) > 1:
+        for check in checks:
+            if match.group(1) in check:
+                return check
+    return "\n".join(checks)
+
+
+def complete_yaml_witness(witness, input_files, specification, fail_function):
+    """Complete a violation witness as produced by CBMC or JBMC with the
+    metadata of the verification task and the columns of the locations.
+
+    The tools emit locations with the file name as given to the front end and
+    without columns. Each location is mapped to an input file;
+    function_return waypoints that cannot be mapped are dropped. The k-th of
+    consecutive function_return waypoints on the same line gets the column of
+    the k-th nondet call on that line."""
+    language_match = re.search(r'^      language: "(\w+)"$', witness, re.MULTILINE)
+    language = language_match.group(1) if language_match else "C"
+
+    header, separator, content = witness.partition("\n  content:")
+    blocks = re.split(r"(?m)^(?=  - segment:$)", content)
+    content_head, waypoint_blocks = blocks[0], blocks[1:]
+
+    task = ["      input_files:"]
+    task += [f"      - {yaml_string(f)}" for f in input_files]
+    task.append("      input_file_hashes:")
+    for f in input_files:
+        with open(f, "rb") as file:
+            digest = hashlib.sha256(file.read()).hexdigest()
+        task.append(f"        {yaml_string(f)}: {yaml_string(digest)}")
+    task.append(f"      specification: {yaml_string(specification)}")
+    header = header.replace("\n    task:", "\n    task:\n" + "\n".join(task), 1)
+
+    lines_of = {}
+    def source_line(file_name, line):
+        if file_name not in lines_of:
+            with open(file_name, errors="replace") as file:
+                lines_of[file_name] = file.read().splitlines()
+        lines = lines_of[file_name]
+        return lines[line - 1] if 0 < line <= len(lines) else ""
+
+    completed = []
+    previous = None  # (file, line) of the previous function_return waypoint
+    occurrence = 0
+    for block in waypoint_blocks:
+        waypoint_type = re.search(r'^        type: "(\w+)"$', block, re.MULTILINE).group(1)
+        file_match = re.search(r'^          file_name: (".*")$', block, re.MULTILINE)
+        line = int(re.search(r"^          line: (\d+)$", block, re.MULTILINE).group(1))
+        input_file = find_input_file(json.loads(file_match.group(1)), input_files)
+        if input_file is None:
+            if waypoint_type == "function_return":
+                continue
+            completed.append(block)
+            continue
+
+        column = None
+        if waypoint_type == "function_return":
+            occurrence = occurrence + 1 if previous == (input_file, line) else 0
+            previous = (input_file, line)
+            columns = nondet_call_columns(source_line(input_file, line), language)
+            if len(columns) == 1:
+                column = columns[0]
+            elif occurrence < len(columns):
+                column = columns[occurrence]
+        elif waypoint_type == "target" and fail_function:
+            column = call_start_column(source_line(input_file, line), fail_function)
+
+        block = block.replace(
+            file_match.group(0), f"          file_name: {yaml_string(input_file)}", 1)
+        if column is not None:
+            block = re.sub(
+                r"(?m)^(          line: \d+)$", rf"\1\n          column: {column}", block, count=1)
+        completed.append(block)
+
+    if not waypoint_blocks:
+        return header + separator + content
+    if not completed:
+        return header + separator + " []\n"
+    return header + separator + content_head + "".join(completed)
+
+
+def make_yaml_witness(producer, version, language, waypoints):
+    """Return a violation witness in the format produced by CBMC and JBMC.
+
+    Each waypoint is a dict with the keys type, file_name, line and, for
+    function_return waypoints, value."""
+    formats = {"C": "acsl_expression", "Java": "ext_java_expression"}
+    out = [
+        '- entry_type: "violation_sequence"',
+        "  metadata:",
+        f"    format_version: {yaml_string('2.4' if language == 'Java' else '2.0')}",
+        f"    uuid: {yaml_string(str(uuid.uuid4()))}",
+        "    creation_time: "
+        + yaml_string(datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")),
+        "    producer:",
+        f"      name: {yaml_string(producer)}",
+        f"      version: {yaml_string(version)}",
+        "    task:",
+        f"      language: {yaml_string(language)}",
+        "  content:" + ("" if waypoints else " []"),
+    ]
+    for waypoint in waypoints:
+        out += [
+            "  - segment:",
+            "    - waypoint:",
+            f"        type: {yaml_string(waypoint['type'])}",
+            '        action: "follow"',
+        ]
+        if "value" in waypoint:
+            out += [
+                "        constraint:",
+                "          value: " + yaml_string("\\result == " + waypoint["value"]),
+                f"          format: {yaml_string(formats[language])}",
+            ]
+        out += [
+            "        location:",
+            f"          file_name: {yaml_string(waypoint['file_name'])}",
+            f"          line: {waypoint['line']}",
+        ]
+    return "\n".join(out) + "\n"
+
+
 class ToolWrapper(ABC):
     """Abstract base class for tool wrappers"""
     
@@ -33,6 +223,8 @@ class ToolWrapper(ABC):
         self.benchmarks = []
         self.prop_file = ""
         self.witness_file = ""
+        self.witness_format = None
+        self.input_files = []
         self.prop = None
         self.entry = None
         self.label = None
@@ -54,6 +246,11 @@ class ToolWrapper(ABC):
                 i += 1
             elif args[i] == "--graphml-witness" and i + 1 < len(args):
                 self.witness_file = args[i + 1]
+                self.witness_format = "graphml"
+                i += 1
+            elif args[i] == "--witness" and i + 1 < len(args):
+                self.witness_file = args[i + 1]
+                self.witness_format = "yaml"
                 i += 1
             elif args[i] == "--version":
                 self.print_version()
@@ -216,6 +413,32 @@ class ToolWrapper(ABC):
         
         return processed_witness
         
+    def witness_options(self):
+        """Return the tool options for writing the witness to the log file"""
+        option = "--witness" if self.witness_format == "yaml" else "--graphml-witness"
+        return [option, f"{self.log_file}.witness"]
+
+    def process_yaml(self, exit_code, result):
+        """Complete the YAML witness written by the tool"""
+        witness_path = f"{self.log_file}.witness"
+        # correctness witnesses are not supported yet
+        if exit_code != 10 or not os.path.exists(witness_path):
+            return None
+
+        with open(witness_path, 'r') as f:
+            witness_content = f.read()
+        with open(self.prop_file, 'r') as f:
+            specification = violated_specification(f.read(), result)
+
+        return complete_yaml_witness(
+            witness_content, self.input_files, specification, self.fail_function)
+
+    def process_witness(self, exit_code, result=None):
+        """Process the witness written by the tool"""
+        if self.witness_format == "yaml":
+            return self.process_yaml(exit_code, result)
+        return self.process_graphml(exit_code)
+
     def setup_environment(self):
         """Set up temporary directories and files"""
         # Create temporary directory for benchmarks
@@ -253,7 +476,9 @@ class ToolWrapper(ABC):
         try:
             self.validate_inputs()
             self.parse_property_file()
-            self.setup_environment()           
+            self.setup_environment()
+            # the tools may replace benchmark files by patched copies
+            self.input_files = list(self.benchmarks)
             
             # Run the tool
             ec = self.run()
@@ -271,18 +496,18 @@ class ToolWrapper(ABC):
             # Generate result
             if ec == 0:
                 if self.witness_file:
-                    witness_content = self.process_graphml(ec)
+                    witness_content = self.process_witness(ec)
                     if witness_content:
                         with open(self.witness_file, 'w') as f:
                             f.write(witness_content)
                 print("TRUE")
             elif ec == 10:
+                result = self.parse_result(log_content)
                 if self.witness_file:
-                    witness_content = self.process_graphml(ec)
+                    witness_content = self.process_witness(ec, result)
                     if witness_content:
                         with open(self.witness_file, 'w') as f:
                             f.write(witness_content)
-                result = self.parse_result(log_content)
                 print(result)
             else:
                 print("UNKNOWN")
