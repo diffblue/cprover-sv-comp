@@ -146,6 +146,15 @@ class TestProcessYAML(unittest.TestCase):
         # the target points to the call of reach_error
         self.assertIn('          line: 6\n          column: 7\n', witness)
 
+    def test_complete_producer_version(self):
+        os.chdir(self.temp_dir)
+        witness = complete_yaml_witness(
+            C_WITNESS, ["main.c"], "CHECK( init(main()), LTL(G ! call(reach_error())) )",
+            "reach_error", producer_version="6.11.0 (+ cprover-sv-comp-0123456789)")
+        self.assertIn('      name: "CBMC"\n'
+                      '      version: "6.11.0 (+ cprover-sv-comp-0123456789)"\n', witness)
+        self.assertNotIn('"6.11.0"', witness)
+
     def test_make_yaml_witness(self):
         witness = make_yaml_witness("JBMC", "6.11.0", "Java", [
             {"type": "function_return", "file_name": "Main.java", "line": 5,
@@ -164,12 +173,13 @@ class TestProcessYAML(unittest.TestCase):
         with open(prop_file, 'w') as f:
             f.write("CHECK( init(main()), LTL(G ! call(reach_error())) )\n")
         wrapper = CBMCWrapper()
-        wrapper.tool_binary = "true"
         wrapper.prop_file = prop_file
         wrapper.input_files = ["main.c"]
         wrapper.bit_width = "32"
-        witness = wrapper.process_yaml(0, None)
+        with patch.object(wrapper, "tool_version", return_value="6.11.0 (cbmc-6.11.0)"):
+            witness = wrapper.process_yaml(0, None)
         self.assertTrue(witness.startswith('- entry_type: "invariant_set"\n'))
+        self.assertIn('      version: "6.11.0 (cbmc-6.11.0 + cprover-sv-comp-', witness)
         self.assertIn('    format_version: "2.0"\n', witness)
         self.assertIn('      - "main.c"\n', witness)
         self.assertIn(

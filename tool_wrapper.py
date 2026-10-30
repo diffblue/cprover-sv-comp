@@ -100,9 +100,11 @@ def violated_specification(prop_file_content, result):
     return "\n".join(checks)
 
 
-def complete_yaml_witness(witness, input_files, specification, fail_function):
+def complete_yaml_witness(witness, input_files, specification, fail_function,
+                          producer_version=None):
     """Complete a violation witness as produced by CBMC or JBMC with the
     metadata of the verification task and the columns of the locations.
+    If given, producer_version replaces the version of the producer.
 
     The tools emit locations with the file name as given to the front end and
     without columns. Each location is mapped to an input file;
@@ -125,6 +127,11 @@ def complete_yaml_witness(witness, input_files, specification, fail_function):
         task.append(f"        {yaml_string(f)}: {yaml_string(digest)}")
     task.append(f"      specification: {yaml_string(specification)}")
     header = header.replace("\n    task:", "\n    task:\n" + "\n".join(task), 1)
+    if producer_version is not None:
+        header = re.sub(
+            r"(?m)^(    producer:\n(?:      .*\n)*?      version: ).*$",
+            lambda match: match.group(1) + yaml_string(producer_version),
+            header, count=1)
 
     lines_of = {}
     def source_line(file_name, line):
@@ -446,10 +453,11 @@ class ToolWrapper(ABC):
 
     def process_yaml(self, exit_code, result):
         """Complete the YAML witness written by the tool"""
+        version = self.tool_and_wrapper_version()
         if exit_code == 0:
             # a correctness witness without invariants
             witness_content = make_yaml_witness(
-                self.tool_name, self.tool_version(), self.language, [],
+                self.tool_name, version, self.language, [],
                 entry_type="invariant_set",
                 data_model=None if self.language == "Java" else
                 ("ILP32" if self.bit_width == "32" else "LP64"))
@@ -463,7 +471,8 @@ class ToolWrapper(ABC):
             specification = violated_specification(f.read(), result)
 
         return complete_yaml_witness(
-            witness_content, self.input_files, specification, self.fail_function)
+            witness_content, self.input_files, specification, self.fail_function,
+            producer_version=version)
 
     def process_witness(self, exit_code, result=None):
         """Process the witness written by the tool"""
