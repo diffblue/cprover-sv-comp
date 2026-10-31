@@ -106,12 +106,14 @@ class JBMCWrapper(ToolWrapper):
         for i, bm_file in enumerate(self.benchmarks):
             if "Verifier.java" in bm_file:
                 verifier_file = os.path.join(src_dir, "Verifier.java")
-                shutil.copy(bm_file, verifier_file)
+                # copy the contents only, as the benchmark files may be
+                # read-only, but the copy gets patched
+                shutil.copyfile(bm_file, verifier_file)
                 
                 # Also copy ObjectFactory.java if it exists
                 object_factory = os.path.join(os.path.dirname(bm_file), "ObjectFactory.java")
                 if os.path.exists(object_factory):
-                    shutil.copy(object_factory, os.path.join(src_dir, "ObjectFactory.java"))
+                    shutil.copyfile(object_factory, os.path.join(src_dir, "ObjectFactory.java"))
                     
                 self.benchmarks[i] = verifier_file
             else:
