@@ -38,6 +38,25 @@ VERIFIER_WITNESS_METHODS = """
   private static void __cproverWitnessValue(Object v) { }
 """ % NONDET_LOG_PREFIX
 
+# Restricts the classes that JBMC loads from the classpath (--java-cp-include-files
+# takes a regular expression that must match the whole file name, e.g.
+# java/lang/String.class). core-models.jar contains the whole of java.base from
+# JDK 21, and JBMC loads every class that a loaded class refers to, so without a
+# restriction it loads most of the 7800 classes and runs out of time and memory.
+# This keeps
+#  - all classes that are not part of the JDK (the benchmark, Verifier, the CProver API),
+#  - the top level classes of java.lang, java.lang.ref, java.util and java.io,
+#  - java.util.regex, java.util.function, java.net.URL* and java.text.
+# The set was determined from the benchmarks in sv-benchmarks/java; it needs the
+# JBMC fixes that make references to excluded classes harmless.
+JAVA_CP_INCLUDE_FILES = (
+    r"(?!(java|javax|jdk|sun|com/sun)/).*"
+    r"|java/(lang|lang/ref|util|io)/[^/]*"
+    r"|java/util/(regex|function)/.*"
+    r"|java/net/URL.*"
+    r"|java/text/.*"
+)
+
 class JBMCWrapper(ToolWrapper):
     """JBMC-specific wrapper implementation"""
     
@@ -359,7 +378,7 @@ class JBMCWrapper(ToolWrapper):
                     result = subprocess.run(["sha1sum", file], capture_output=True, text=True)
                     log.write(result.stdout)
                     
-        more_options = "--java-threading --throw-runtime-exceptions --max-nondet-string-length 125 --classpath core-models.jar:cprover-api.jar"
+        more_options = "--java-threading --throw-runtime-exceptions --max-nondet-string-length 125 --classpath core-models.jar:cprover-api.jar --java-cp-include-files " + JAVA_CP_INCLUDE_FILES
         
         # Adjust property options
         if self.prop == "unreach_call":
