@@ -398,7 +398,12 @@ class JBMCWrapper(ToolWrapper):
                     result = subprocess.run(["sha1sum", file], capture_output=True, text=True)
                     log.write(result.stdout)
                     
-        more_options = "--java-threading --throw-runtime-exceptions --max-nondet-string-length 125 --classpath core-models.jar:cprover-api.jar --java-cp-include-files " + JAVA_CP_INCLUDE_FILES
+        # Verifier.class is removed, so jbmc treats the methods of the Verifier as
+        # unknown methods, whose results (such as that of nondetString) could be
+        # null (e.g., a nondetString() that is null makes a program throw a
+        # NullPointerException); --java-assume-inputs-non-null excludes this, as
+        # the Verifier never returns null, and neither is the argument of main
+        more_options = "--java-threading --throw-runtime-exceptions --java-assume-inputs-non-null --max-nondet-string-length 125 --classpath core-models.jar:cprover-api.jar --java-cp-include-files " + JAVA_CP_INCLUDE_FILES
         
         # Adjust property options
         if self.prop == "unreach_call":
