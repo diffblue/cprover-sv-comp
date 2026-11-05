@@ -148,8 +148,12 @@ class JBMCWrapper(ToolWrapper):
         java_options = "-ea" if self.prop == "unreach_call" else ""
         
         # Compile Java files
+        # JBMC ignores the invokedynamic instructions that javac emits for
+        # string concatenation since Java 9 (StringConcatFactory), so the
+        # concatenated strings would be lost; compile to StringBuilder calls
         javac_cmd = [
             self._javac_path(),
+            "-XDstringConcat=inline",
             "-g",
             "-cp", classes_dir,
             "-d", classes_dir
