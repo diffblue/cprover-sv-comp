@@ -67,6 +67,10 @@ class JBMCWrapper(ToolWrapper):
         self.find_options = "-name '*.java'"
         self.language = "Java"
         self.jvm_home = None
+        # core-models.jar contains the whole of java.base, so programs address
+        # many more objects than the 2^11 that the C tools need; this is
+        # JBMC's own default
+        self.obj_bits = "16"
 
     def print_version(self):
         """Print JBMC version and the version of this wrapper"""
