@@ -46,7 +46,9 @@ VERIFIER_WITNESS_METHODS = """
 # This keeps
 #  - all classes that are not part of the JDK (the benchmark, Verifier, the CProver API),
 #  - the top level classes of java.lang, java.lang.ref, java.util and java.io,
-#  - java.util.regex, java.util.function, java.net.URL* and java.text.
+#  - java.util.regex, java.util.function, java.net.URL* and java.text,
+#  - jdk.internal.misc.VM, which e.g. BufferedWriter asks whether the VM is booted;
+#    without it the analysis of a PrintWriter runs out of memory.
 # The set was determined from the benchmarks in sv-benchmarks/java; it needs the
 # JBMC fixes that make references to excluded classes harmless.
 JAVA_CP_INCLUDE_FILES = (
@@ -55,6 +57,7 @@ JAVA_CP_INCLUDE_FILES = (
     r"|java/util/(regex|function)/.*"
     r"|java/net/URL.*"
     r"|java/text/.*"
+    r"|jdk/internal/misc/VM\.class"
 )
 
 class JBMCWrapper(ToolWrapper):
