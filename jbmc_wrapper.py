@@ -60,6 +60,37 @@ JAVA_CP_INCLUDE_FILES = (
     r"|jdk/internal/misc/VM\.class"
 )
 
+# The Verifier of SV-COMP for jbmc: the calls are replaced by the methods of the
+# CProver API, which jbmc interprets; the results of nondetString (and objects)
+# are not null, as for the Verifier of SV-COMP
+JBMC_VERIFIER = """package org.sosy_lab.sv_benchmarks;
+
+import org.cprover.CProver;
+
+public final class Verifier {
+  public static void assume(boolean condition) { CProver.assume(condition); }
+  public static boolean nondetBoolean() { return CProver.nondetBoolean(); }
+  public static byte nondetByte() { return CProver.nondetByte(); }
+  public static char nondetChar() { return CProver.nondetChar(); }
+  public static short nondetShort() { return CProver.nondetShort(); }
+  public static int nondetInt() { return CProver.nondetInt(); }
+  public static long nondetLong() { return CProver.nondetLong(); }
+  public static float nondetFloat() { return CProver.nondetFloat(); }
+  public static double nondetDouble() { return CProver.nondetDouble(); }
+  public static String nondetString() { return CProver.nondetWithoutNull(""); }
+  public static <T> T nondetObject(Class<T> type, ObjectFactory<T> factory) {
+    return factory.createObject();
+  }
+}
+"""
+
+JBMC_OBJECT_FACTORY = """package org.sosy_lab.sv_benchmarks;
+
+public interface ObjectFactory<T> {
+  T createObject();
+}
+"""
+
 class JBMCWrapper(ToolWrapper):
     """JBMC-specific wrapper implementation"""
     
@@ -379,13 +410,28 @@ class JBMCWrapper(ToolWrapper):
         with open(f"{self.log_file}.witness", 'w') as f:
             f.write(witness_content)
             
+    def _compile_jbmc_verifier(self, classes_dir):
+        """Compile an implementation of the Verifier and the ObjectFactory that
+        calls the CProver API into classes_dir, replacing the classes of the
+        benchmark."""
+        src_dir = os.path.join(self.bm_dir, "jbmc-verifier", "org", "sosy_lab", "sv_benchmarks")
+        os.makedirs(src_dir, exist_ok=True)
+        sources = []
+        for name, content in (("Verifier.java", JBMC_VERIFIER), ("ObjectFactory.java", JBMC_OBJECT_FACTORY)):
+            path = os.path.join(src_dir, name)
+            with open(path, 'w') as f:
+                f.write(content)
+            sources.append(path)
+        subprocess.run(
+            [self._javac_path(), "-cp", "cprover-api.jar", "-d", classes_dir] + sources,
+            check=True)
+
     def _run_jbmc(self, classes_dir):
         """Run JBMC analysis"""
-        # Remove Verifier.class
-        verifier_class = os.path.join(classes_dir, "org", "sosy_lab", "sv_benchmarks", "Verifier.class")
-        if os.path.exists(verifier_class):
-            os.remove(verifier_class)
-            
+        # Replace Verifier.class by an implementation that uses the CProver API,
+        # as jbmc does not know the Verifier and would ignore, e.g., assume
+        self._compile_jbmc_verifier(classes_dir)
+
         # Create JAR file
         task_jar = os.path.join(self.bm_dir, "task.jar")
         jar_cmd = ["jar", "-cfe", task_jar, "Main", "-C", classes_dir, "."]
