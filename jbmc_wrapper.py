@@ -285,15 +285,24 @@ class JBMCWrapper(ToolWrapper):
             ec = 10
             # Create minimal witness
             self._create_minimal_witness()
-            shutil.copy(f"{self.log_file}.latest", f"{self.log_file}.ok")
+            self._keep_execution_log()
         elif ecr == 0:
             # No assertion failure, but might be deterministic
             if not self._has_nondet():
                 ec = 0
-                shutil.copy(f"{self.log_file}.latest", f"{self.log_file}.ok")
+                self._keep_execution_log()
                     
         return ec
         
+    def _keep_execution_log(self):
+        """Keep the output of the program execution as the log of the result.
+        The result is only reported if this log is not empty, but a program
+        may well run without printing anything."""
+        shutil.copy(f"{self.log_file}.latest", f"{self.log_file}.ok")
+        if os.path.getsize(f"{self.log_file}.ok") == 0:
+            with open(f"{self.log_file}.ok", 'w') as log:
+                log.write("The program was executed and printed nothing\n")
+
     def _has_nondet(self):
         """Check if benchmarks contain nondeterministic operations"""
         for bm_file in self.benchmarks:
