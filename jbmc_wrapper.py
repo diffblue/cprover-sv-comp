@@ -60,6 +60,14 @@ JAVA_CP_INCLUDE_FILES = (
     r"|jdk/internal/misc/VM\.class"
 )
 
+# The methods of the classes of the JDK that are not loaded (they are excluded
+# by JAVA_CP_INCLUDE_FILES or missing in the models) are not modelled: they fail
+# with a "not modelled" property, which the wrapper reports as UNKNOWN, instead
+# of returning an arbitrary value.
+JAVA_NOT_MODELLED_STUBS = (
+    r"(?!(?:" + JAVA_CP_INCLUDE_FILES + r")$)(?:java|javax|jdk|sun|com/sun)/.*"
+)
+
 # The Verifier of SV-COMP for jbmc: the calls are replaced by the methods of the
 # CProver API, which jbmc interprets; the results of nondetString (and objects)
 # are not null, as for the Verifier of SV-COMP
@@ -444,7 +452,7 @@ class JBMCWrapper(ToolWrapper):
                     result = subprocess.run(["sha1sum", file], capture_output=True, text=True)
                     log.write(result.stdout)
                     
-        more_options = "--java-threading --throw-runtime-exceptions --max-nondet-string-length 125 --classpath core-models.jar:cprover-api.jar --java-cp-include-files " + JAVA_CP_INCLUDE_FILES
+        more_options = "--java-threading --throw-runtime-exceptions --max-nondet-string-length 125 --classpath core-models.jar:cprover-api.jar --java-cp-include-files " + JAVA_CP_INCLUDE_FILES + " --java-not-modelled-stubs " + JAVA_NOT_MODELLED_STUBS
         
         # Adjust property options
         if self.prop == "unreach_call":
