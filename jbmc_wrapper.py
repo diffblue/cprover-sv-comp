@@ -50,6 +50,7 @@ VERIFIER_WITNESS_METHODS = """
 #  - jdk.internal.misc.VM, which e.g. BufferedWriter asks whether the VM is booted;
 #    without it the analysis of a PrintWriter runs out of memory.
 #  - java.util.concurrent.Executor, the functional interface of lambdas in the benchmarks,
+#  - jdk.internal.util.Preconditions, the index checks of Objects, ArrayList, ...,
 #  - jdk.internal.misc.Unsafe and jdk.internal.access.SharedSecrets, which the static
 #    initializers of java.util.Properties and java.io.PrintWriter call (they would be
 #    reported as not modelled by every program that uses System or a PrintWriter).
@@ -64,6 +65,7 @@ JAVA_CP_INCLUDE_FILES = (
     r"|jdk/internal/misc/(VM|Unsafe)\.class"
     r"|jdk/internal/access/SharedSecrets\.class"
     r"|java/util/concurrent/Executor\.class"
+    r"|jdk/internal/util/Preconditions[^/]*\.class"
 )
 
 # The methods of the classes of the JDK that are not loaded (they are excluded
