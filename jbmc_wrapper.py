@@ -49,6 +49,9 @@ VERIFIER_WITNESS_METHODS = """
 #  - java.util.regex, java.util.function, java.net.URL* and java.text,
 #  - jdk.internal.misc.VM, which e.g. BufferedWriter asks whether the VM is booted;
 #    without it the analysis of a PrintWriter runs out of memory.
+#  - jdk.internal.misc.Unsafe and jdk.internal.access.SharedSecrets, which the static
+#    initializers of java.util.Properties and java.io.PrintWriter call (they would be
+#    reported as not modelled by every program that uses System or a PrintWriter).
 # The set was determined from the benchmarks in sv-benchmarks/java; it needs the
 # JBMC fixes that make references to excluded classes harmless.
 JAVA_CP_INCLUDE_FILES = (
@@ -57,7 +60,8 @@ JAVA_CP_INCLUDE_FILES = (
     r"|java/util/(regex|function)/.*"
     r"|java/net/URL.*"
     r"|java/text/.*"
-    r"|jdk/internal/misc/VM\.class"
+    r"|jdk/internal/misc/(VM|Unsafe)\.class"
+    r"|jdk/internal/access/SharedSecrets\.class"
 )
 
 # The methods of the classes of the JDK that are not loaded (they are excluded
