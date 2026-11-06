@@ -355,7 +355,12 @@ class ToolWrapper(ABC):
         tail_lines = lines[-50:] if len(lines) >= 50 else lines
         tail_content = '\n'.join(tail_lines)
         
-        if re.search(r"Unmodelled library functions have been called", tail_content):
+        # a property of a call of an unmodelled library function was violated
+        # ("not modelled: <method>"), or a violation of another property passes
+        # through such a call
+        if re.search(
+                r"Unmodelled library functions have been called|^\s*not modelled: ",
+                tail_content, re.MULTILINE):
             return "UNKNOWN"
         elif re.search(r"(\[.*\] .*__CPROVER_memory_leak == NULL|\s*__CPROVER_memory_leak == NULL$)", tail_content, re.MULTILINE):
             if self.prop == "memcleanup":
@@ -544,7 +549,7 @@ class ToolWrapper(ABC):
                 print("TRUE")
             elif ec == 10:
                 result = self.parse_result(log_content)
-                if self.witness_file:
+                if self.witness_file and result != "UNKNOWN":
                     witness_content = self.process_witness(ec, result)
                     if witness_content:
                         with open(self.witness_file, 'w') as f:

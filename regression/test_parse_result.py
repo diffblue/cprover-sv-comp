@@ -25,6 +25,18 @@ Final line
         result = self.wrapper.parse_result(log_content)
         self.assertEqual(result, "UNKNOWN")
     
+    def test_not_modelled_property_violated(self):
+        """Test UNKNOWN result for the violation of the property of an unmodelled call"""
+        log_content = """Violated property:
+  file java/lang/Math.java function java::java.lang.Math.sin:(D)D line 12 thread 0
+  not modelled: java::java.lang.Math.sin:(D)D
+  false
+
+VERIFICATION FAILED
+"""
+        result = self.wrapper.parse_result(log_content)
+        self.assertEqual(result, "UNKNOWN")
+
     def test_memory_leak_memcleanup_property(self):
         """Test memory leak detection with memcleanup property"""
         self.wrapper.prop = "memcleanup"
