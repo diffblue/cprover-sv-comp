@@ -50,6 +50,8 @@ VERIFIER_WITNESS_METHODS = """
 #  - jdk.internal.misc.VM, which e.g. BufferedWriter asks whether the VM is booted;
 #    without it the analysis of a PrintWriter runs out of memory.
 #  - java.util.concurrent.Executor, the functional interface of lambdas in the benchmarks,
+#  - sun.util.locale.BaseLocale, LocaleUtils and jdk.internal.util.StaticProperty, which
+#    java.util.Locale needs (String.toLowerCase(Locale.UK) etc.),
 #  - jdk.internal.util.Preconditions, the index checks of Objects, ArrayList, ...,
 #  - jdk.internal.misc.Unsafe and jdk.internal.access.SharedSecrets, which the static
 #    initializers of java.util.Properties and java.io.PrintWriter call (they would be
@@ -66,6 +68,8 @@ JAVA_CP_INCLUDE_FILES = (
     r"|jdk/internal/access/SharedSecrets\.class"
     r"|java/util/concurrent/Executor\.class"
     r"|jdk/internal/util/Preconditions[^/]*\.class"
+    r"|sun/util/locale/(BaseLocale|LocaleUtils)\.class"
+    r"|jdk/internal/util/StaticProperty\.class"
 )
 
 # The methods of the classes of the JDK that are not loaded (they are excluded
