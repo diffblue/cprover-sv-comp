@@ -52,6 +52,9 @@ VERIFIER_WITNESS_METHODS = """
 #  - java.util.concurrent.Executor, the functional interface of lambdas in the benchmarks,
 #  - sun.util.locale.BaseLocale, LocaleUtils and jdk.internal.util.StaticProperty, which
 #    java.util.Locale needs (String.toLowerCase(Locale.UK) etc.),
+#  - ConcurrentHashMap, ConcurrentMap and the atomic classes (models without Unsafe),
+#  - ArraysSupport, AccessController, GetPropertyAction and Reflection (security and
+#    reflection support of the JDK that the models provide in a reduced form),
 #  - jdk.internal.misc.CDS, which the static initializer of ImmutableCollections (List.of,
 #    Set.of, Map.of) asks for a random seed,
 #  - jdk.internal.util.Preconditions, the index checks of Objects, ArrayList, ...,
@@ -68,11 +71,16 @@ JAVA_CP_INCLUDE_FILES = (
     r"|java/text/.*"
     r"|jdk/internal/misc/(VM|Unsafe)\.class"
     r"|jdk/internal/access/SharedSecrets\.class"
-    r"|java/util/concurrent/Executor\.class"
+    r"|java/util/concurrent/(Executor|ConcurrentMap|ConcurrentHashMap)\.class"
+    r"|java/util/concurrent/atomic/Atomic(Boolean|Integer|Long|Reference)\.class"
     r"|jdk/internal/util/Preconditions[^/]*\.class"
     r"|sun/util/locale/(BaseLocale|LocaleUtils)\.class"
     r"|jdk/internal/util/StaticProperty\.class"
     r"|jdk/internal/misc/CDS\.class"
+    r"|jdk/internal/util/ArraysSupport\.class"
+    r"|java/security/AccessController[^/]*\.class"
+    r"|sun/security/action/GetPropertyAction\.class"
+    r"|jdk/internal/reflect/Reflection\.class"
 )
 
 # The methods of the classes of the JDK that are not loaded (they are excluded
