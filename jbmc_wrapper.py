@@ -52,6 +52,8 @@ VERIFIER_WITNESS_METHODS = """
 #  - java.util.concurrent.Executor, the functional interface of lambdas in the benchmarks,
 #  - sun.util.locale.BaseLocale, LocaleUtils and jdk.internal.util.StaticProperty, which
 #    java.util.Locale needs (String.toLowerCase(Locale.UK) etc.),
+#  - jdk.internal.misc.CDS, which the static initializer of ImmutableCollections (List.of,
+#    Set.of, Map.of) asks for a random seed,
 #  - jdk.internal.util.Preconditions, the index checks of Objects, ArrayList, ...,
 #  - jdk.internal.misc.Unsafe and jdk.internal.access.SharedSecrets, which the static
 #    initializers of java.util.Properties and java.io.PrintWriter call (they would be
@@ -70,6 +72,7 @@ JAVA_CP_INCLUDE_FILES = (
     r"|jdk/internal/util/Preconditions[^/]*\.class"
     r"|sun/util/locale/(BaseLocale|LocaleUtils)\.class"
     r"|jdk/internal/util/StaticProperty\.class"
+    r"|jdk/internal/misc/CDS\.class"
 )
 
 # The methods of the classes of the JDK that are not loaded (they are excluded
