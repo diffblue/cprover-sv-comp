@@ -111,6 +111,8 @@ def complete_yaml_witness(witness, input_files, specification, fail_function,
     function_return waypoints that cannot be mapped are dropped. The k-th of
     consecutive function_return waypoints on the same line gets the column of
     the k-th nondet call on that line."""
+    # a file that is in several of the input directories is listed once
+    input_files = list(dict.fromkeys(input_files))
     language_match = re.search(r'^      language: "(\w+)"$', witness, re.MULTILINE)
     language = language_match.group(1) if language_match else "C"
 
@@ -215,10 +217,11 @@ def make_yaml_witness(producer, version, language, waypoints,
             f"        type: {yaml_string(waypoint['type'])}",
             '        action: "follow"',
         ]
-        if "value" in waypoint:
+        if "value" in waypoint or "constraint" in waypoint:
+            constraint = waypoint.get("constraint") or "\\result == " + waypoint["value"]
             out += [
                 "        constraint:",
-                "          value: " + yaml_string("\\result == " + waypoint["value"]),
+                "          value: " + yaml_string(constraint),
                 f"          format: {yaml_string(formats[language])}",
             ]
         out += [

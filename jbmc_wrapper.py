@@ -15,7 +15,7 @@ NONDET_LOG_PREFIX = "CPROVER-WITNESS-NONDET"
 # Reports the call site and the returned value of the Verifier.nondet*
 # methods; the call site is the fourth frame: __cproverWitness,
 # __cproverWitnessValue, Verifier.nondet*, caller
-VERIFIER_WITNESS_METHODS = """
+VERIFIER_WITNESS_METHODS = r"""
   private static void __cproverWitness(String value) {
     StackTraceElement caller = new Throwable().getStackTrace()[3];
     String className = caller.getClassName();
@@ -23,17 +23,36 @@ VERIFIER_WITNESS_METHODS = """
     int dot = className.lastIndexOf('.');
     String path = (dot < 0 ? "" : className.substring(0, dot).replace('.', '/') + "/")
         + caller.getFileName();
-    System.err.println("%s\\t" + path + "\\t" + caller.getLineNumber() + "\\t" + value);
+    System.err.println("%s\t" + path + "\t" + caller.getLineNumber() + "\t" + value);
   }
   private static void __cproverWitnessValue(boolean v) { __cproverWitness(String.valueOf(v)); }
   private static void __cproverWitnessValue(char v) { __cproverWitness(String.valueOf((int) v)); }
   private static void __cproverWitnessValue(int v) { __cproverWitness(String.valueOf(v)); }
   private static void __cproverWitnessValue(long v) { __cproverWitness(v + "L"); }
   private static void __cproverWitnessValue(float v) {
-    if (!Float.isNaN(v) && !Float.isInfinite(v)) __cproverWitness(v + "f");
+    if (Float.isNaN(v)) __cproverWitness("Float.NaN");
+    else if (Float.isInfinite(v))
+      __cproverWitness(v > 0 ? "Float.POSITIVE_INFINITY" : "Float.NEGATIVE_INFINITY");
+    else __cproverWitness(v + "f");
   }
   private static void __cproverWitnessValue(double v) {
-    if (!Double.isNaN(v) && !Double.isInfinite(v)) __cproverWitness(String.valueOf(v));
+    if (Double.isNaN(v)) __cproverWitness("Double.NaN");
+    else if (Double.isInfinite(v))
+      __cproverWitness(v > 0 ? "Double.POSITIVE_INFINITY" : "Double.NEGATIVE_INFINITY");
+    else __cproverWitness(String.valueOf(v));
+  }
+  private static void __cproverWitnessValue(String v) {
+    // reported as EQUALS:<Java string literal>, see _violation_waypoints
+    if (v == null) return;
+    StringBuilder b = new StringBuilder("EQUALS:\"");
+    for (int i = 0; i < v.length(); i++) {
+      char c = v.charAt(i);
+      if (c == '"') b.append("\\\"");
+      else if (c == '\\') b.append("\\\\");
+      else if (c >= 0x20 && c < 0x7f) b.append(c);
+      else b.append(String.format("\\u%%04x", (int) c));
+    }
+    __cproverWitness(b.append('"').toString());
   }
   private static void __cproverWitnessValue(Object v) { }
 """ % NONDET_LOG_PREFIX
@@ -283,12 +302,17 @@ class JBMCWrapper(ToolWrapper):
         waypoints = []
         for match in re.finditer(
                 r"^" + NONDET_LOG_PREFIX + r"\t(.*)\t(\d+)\t(.*)$", log_content, re.MULTILINE):
-            waypoints.append({
+            waypoint = {
                 "type": "function_return",
                 "file_name": match.group(1),
                 "line": int(match.group(2)),
                 "value": match.group(3),
-            })
+            }
+            if waypoint["value"].startswith("EQUALS:"):
+                # a string: \result.equals("...")
+                waypoint["constraint"] = "\\result.equals(" + waypoint["value"][len("EQUALS:"):] + ")"
+                del waypoint["value"]
+            waypoints.append(waypoint)
 
         # the innermost frame of the exception's stack trace in the program
         exception = log_content.find('Exception in thread "main"')
